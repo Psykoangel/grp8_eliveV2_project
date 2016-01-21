@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import fr.group8.elive.app.R;
+
 /**
  * Created by chriis on 20/01/2016.
  */

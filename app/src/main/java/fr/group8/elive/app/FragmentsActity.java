@@ -5,10 +5,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Pair;
 
 import java.util.List;
 import java.util.Vector;
+
+import fr.group8.elive.adapter.MyPagerAdapter;
+import fr.group8.elive.fragment.dmuFragment;
+import fr.group8.elive.fragment.nfcFragment;
 
 
 /**
@@ -39,9 +42,5 @@ public class FragmentsActity extends FragmentActivity {
         ViewPager pager = (ViewPager) super.findViewById(R.id.viewpager);
         // Affectation de l'adapter au ViewPager
         pager.setAdapter(mPagerAdapter);
-
-        Pair<Boolean, String> result = nfcWrapper.Instance().setNfcAdapter(this);
-
-        if (result != null && !result.first) nfcFrag.showAlert(this, "Error", result.second);
     }
 }
