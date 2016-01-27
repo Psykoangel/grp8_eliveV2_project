@@ -14,16 +14,25 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".LoginActivity"
+            android:name=".SlidingTabActivity"
             android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".FolderActivity"
+            android:label="@string/app_name">
+        </activity>
+        <activity
+            android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".FragmentsActity" android:theme="@style/AppTheme.Dark"/>
+        <activity
+            android:name=".NfcActivity"
+            android:label="@string/title_activity_nfc"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
-
 
 </manifest>
