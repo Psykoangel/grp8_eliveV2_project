@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
+import fr.group8.elive.app.R;
+
 
 import fr.group8.elive.fragment.SlidingTabsColorsFragment;
 

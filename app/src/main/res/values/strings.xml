@@ -16,4 +16,8 @@
     <string name="msg_nfcoff">Le NFC est désactivé, veuillez activer le NFC.</string>
     <string name="msg_nfcon">Le NFC est activé, veuillez passer le TAG.</string>
     <string name="msg_nonfc">Le matériel ne dispose pas de la fonctionnalité NFC.</string>
+    <string name="menu">Menu</string>
+    <string name="tab_information">Information</string>
+    <string name="tab_medicament">Médicament</string>
+    <string name="tab_alergie_maladie">Alergie et Maladie</string>
 </resources>
