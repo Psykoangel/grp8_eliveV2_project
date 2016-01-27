@@ -23,15 +23,6 @@
         <item name="colorButtonNormal">@color/primary_darker</item>
     </style>
 
-    <style name="AppTheme.NoActionBar">
-        <item name="windowActionBar">false</item>
-    </style>
-
-    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
-
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
-
-
     <style name="tablayout_text">
         <item name="android:textSize">12sp</item>
         <item name="android:gravity">center</item>
