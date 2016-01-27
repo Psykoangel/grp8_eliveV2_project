@@ -4,9 +4,7 @@ package fr.group8.elive.tasks;
  * Created by psyko on 18/01/16.
  */
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 
 import fr.group8.elive.app.LoginActivity;
 import fr.group8.elive.app.R;
