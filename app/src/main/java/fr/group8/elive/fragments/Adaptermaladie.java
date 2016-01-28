@@ -1,19 +1,13 @@
-package fr.group8.elive.fragment;
+package fr.group8.elive.fragments;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-
-import org.apache.http.conn.ssl.X509HostnameVerifier;
-
-import java.util.jar.Attributes;
 
 import fr.group8.elive.app.R;
 

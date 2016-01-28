@@ -1,4 +1,4 @@
-package fr.group8.elive.fragment;
+package fr.group8.elive.fragments;
 
 import android.graphics.Color;
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package fr.group8.elive.fragment;
+package fr.group8.elive.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
