@@ -15,8 +15,6 @@ public class SlidingTabActivity extends FolderActivity {
 
     public static final String TAG = "SlidingTabActivity";
 
-    // Whether the Log Fragment is currently shown
-    private boolean mLogShown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
