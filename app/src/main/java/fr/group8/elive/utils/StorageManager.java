@@ -31,60 +31,67 @@ public class StorageManager {
 
     public static String appFileName = "elive_app_data.json";
 
-    private final Boolean IS_DEBUG = true;
-    private final int DB_VERSION = 1;
-    private FileOutputStream fileOutputStream;
+    public final Boolean IS_DEBUG = true;
+    public final int DB_VERSION = 1;
     private DatabaseManager dbManager;
     private boolean dbReady;
 
 
     private StorageManager() {
-        fileOutputStream = null;
         dbManager = null;
         dbReady = false;
     }
 
-    public boolean openFileStorage(Context context, String fileName) {
+    public void loadJsonDataFile() {
 
-        if (fileOutputStream == null) return false;
+    }
 
-        String innerFileName = appFileName;
+    public void addDataToJsonFile() {
 
-        if (fileName == null || fileName.isEmpty())
+    }
+
+    public String searchDataFromJsonFile() {
+
+        return "User";
+    }
+
+    public void createDataBase(Context context) {
+        if (!dbReady)
         {
-            innerFileName = fileName;
-        }
-
-        try {
-            fileOutputStream = context.openFileOutput(innerFileName, Context.MODE_APPEND);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            Storm.getInstance().init(context, IS_DEBUG);
+            dbReady = true;
         }
     }
 
-    public void appendFileStorage(String text) {
-        if (text == null
-                || text.isEmpty()
-                || fileOutputStream == null) return;
+
+    public void initiateDBManager(Context context, String dbName) {
+        this.closeDBManager();
+
+        dbManager = new DatabaseManager(context, dbName, DB_VERSION, null);
 
         try {
-            fileOutputStream.write(text.getBytes());
-        } catch (IOException e) {
+            dbManager.open();
+        } catch (SQLiteException e) {
+            dbManager = null;
             e.printStackTrace();
         }
     }
 
-    public boolean closeFileStorage() {
-        if (fileOutputStream == null) return true;
+    public void closeDBManager() {
+        if (dbManager != null
+                && dbManager.isOpen()) {
+            dbManager.close();
+            dbManager = null;
+        }
+    }
 
+    public void insert(DataUser user) {
+        if (!this.dbManager.isOpen())
+            throw new SQLiteException("DbManager has not been instanciated yet");
         try {
-            fileOutputStream.close();
-            return true;
-        } catch (IOException e) {
+            Storm.newInsert(dbManager).insert(user);
+        } catch (StormException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -126,7 +133,7 @@ public class StorageManager {
             e.printStackTrace();
         }
     }
-
+    
     public void insert(String uniqId, String fileName) {
         this.insert(new DataUser(uniqId, fileName));
     }

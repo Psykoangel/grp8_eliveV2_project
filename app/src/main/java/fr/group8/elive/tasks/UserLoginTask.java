@@ -4,9 +4,11 @@ package fr.group8.elive.tasks;
  * Created by psyko on 18/01/16.
  */
 
+import android.content.Intent;
 import android.os.AsyncTask;
 
 import fr.group8.elive.app.LoginActivity;
+import fr.group8.elive.app.NfcActivity;
 import fr.group8.elive.app.R;
 
 /**
@@ -23,8 +25,11 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "elive:elive", "herve:herve", "michael:michael", "chris:chris"
+    private static final String[] DUMMY_CREDENTIALS = new String[] {
+            "elive:elive",
+            "herve:herve",
+            "michael:michael",
+            "chris:chris"
     };
 
     public UserLoginTask(LoginActivity activity, String email, String password) {
@@ -51,7 +56,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
             }
         }
 
-        return true;
+        return false;
     }
 
     @Override
@@ -60,7 +65,8 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         mActivity.showProgress(false);
 
         if (success) {
-            mActivity.finish();
+            Intent intent = new Intent(mActivity, NfcActivity.class);
+            mActivity.startActivity(intent);
         } else {
             mActivity.getmPasswordView().setError(mActivity.getString(R.string.error_incorrect_password));
             mActivity.getmPasswordView().requestFocus();
