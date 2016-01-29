@@ -52,5 +52,10 @@ public class NfcActivity extends Activity {
         }
 
         AlertHelper.showAlert(this, "DEBUG", "UserId : " + userId.toString());
+
+        // Intent nfcInfo = new Intent(this, FolderActivity.class);
+        // nfcInfo.putExtra("user", "data");
+
+        // this.startActivity(nfcInfo);
     }
 }
