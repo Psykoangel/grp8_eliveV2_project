@@ -25,12 +25,12 @@ public class SlidingTabsColorsFragment extends Fragment {
      * This class represents a tab to be displayed by {@link ViewPager} and it's associated
      * {@link SlidingTabLayout}.
      */
-    static class SamplePagerItem {
+    public static class SamplePagerItem {
         private final CharSequence mTitle;
         private final int mIndicatorColor;
         private final int mDividerColor;
 
-        SamplePagerItem(CharSequence title, int indicatorColor, int dividerColor) {
+        public SamplePagerItem(CharSequence title, int indicatorColor, int dividerColor) {
             mTitle = title;
             mIndicatorColor = indicatorColor;
             mDividerColor = dividerColor;
@@ -47,7 +47,7 @@ public class SlidingTabsColorsFragment extends Fragment {
          * @return the title which represents this tab. In this sample this is used directly by
          * {@link android.support.v4.view.PagerAdapter#getPageTitle(int)}
          */
-        CharSequence getTitle() {
+        public CharSequence getTitle() {
             return mTitle;
         }
 
@@ -82,7 +82,7 @@ public class SlidingTabsColorsFragment extends Fragment {
     /**
      * List of {@link SamplePagerItem} which represent this sample's tabs.
      */
-    private List<SamplePagerItem> mTabs = new ArrayList<SamplePagerItem>();
+    public List<SamplePagerItem> mTabs = new ArrayList<SamplePagerItem>();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

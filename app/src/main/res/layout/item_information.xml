@@ -35,4 +35,53 @@
         tools:text="@string/prenom"
         />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/adress"
+        android:id="@+id/adresse"
+        android:layout_alignBottom="@+id/avatar"
+        android:layout_alignLeft="@+id/prenom"
+        android:layout_alignStart="@+id/prenom"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Relations :"
+        android:id="@+id/relation"
+        android:layout_below="@+id/avatar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="40dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Père :"
+        android:id="@+id/pere"
+        android:layout_below="@+id/relation"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mère :"
+        android:id="@+id/mere"
+        android:layout_below="@+id/pere"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Groupe sanguin :"
+        android:id="@+id/groupe_sanguin"
+        android:layout_below="@+id/mere"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="52dp" />
+
 </RelativeLayout>

@@ -20,4 +20,9 @@
     <string name="tab_information">Information</string>
     <string name="tab_medicament">Médicament</string>
     <string name="tab_alergie_maladie">Alergie et Maladie</string>
+
+    <string name="nom">Nom : </string>
+    <string name="prenom">Prénom : </string>
+    <string name="adress">Adresse :</string>
+
 </resources>

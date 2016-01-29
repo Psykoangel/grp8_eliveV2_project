@@ -2,10 +2,10 @@ package fr.group8.elive.fragment;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import fr.group8.elive.app.R;
 
 /**
@@ -37,7 +37,9 @@ public class ContentFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.pager_item, container, false);
+
+        return inflater.inflate(R.layout.item_information, container, false);
+
     }
 
     @Override
@@ -45,21 +47,20 @@ public class ContentFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         Bundle args = getArguments();
-
+        String sTitle = (String) args.getCharSequence(KEY_TITLE);
         if (args != null) {
-            TextView title = (TextView) view.findViewById(R.id.item_title);
-            title.setText("Title: " + args.getCharSequence(KEY_TITLE));
 
-            int indicatorColor = args.getInt(KEY_INDICATOR_COLOR);
-            TextView indicatorColorView = (TextView) view.findViewById(R.id.item_indicator_color);
-            indicatorColorView.setText("Indicator: #" + Integer.toHexString(indicatorColor));
-            indicatorColorView.setTextColor(indicatorColor);
+            switch (sTitle){
+                case "Information":
+                    break;
+                case "Traitement":
+                    break;
+                case "Alergie et Maladie":
+                    break;
+            }
 
-            int dividerColor = args.getInt(KEY_DIVIDER_COLOR);
-            TextView dividerColorView = (TextView) view.findViewById(R.id.item_divider_color);
-            dividerColorView.setText("Divider: #" + Integer.toHexString(dividerColor));
-            dividerColorView.setTextColor(dividerColor);
         }
+
     }
 }
 
