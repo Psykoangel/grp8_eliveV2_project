@@ -12,4 +12,9 @@ public class NfcException extends Exception {
         super(detailMessage);
         this.exceptionType = exceptionType;
     }
+
+
+    public String getExceptionType() {
+        return exceptionType.toString();
+    }
 }

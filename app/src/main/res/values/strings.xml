@@ -20,4 +20,6 @@
     <string name="tab_information">Information</string>
     <string name="tab_medicament">Médicament</string>
     <string name="tab_alergie_maladie">Alergie et Maladie</string>
+    <string name="nfc_tag_detected">Tag détecté.</string>
+    <string name="general_title_info">Info</string>
 </resources>
