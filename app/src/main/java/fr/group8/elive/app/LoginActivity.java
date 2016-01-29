@@ -83,14 +83,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onClick(View view) {
                 attemptLogin();
-                Intent intent = new Intent(LoginActivity.this, SlidingTabActivity.class);
-                startActivity(intent);
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
 
+
+        //AutoLogin Method ! TODO remove on production
+        autoLogin();
+
+    }
+
+    private void autoLogin() {
+        mEmailView.setText("elive");
+        mPasswordView.setText("elive");
     }
 
     private void populateAutoComplete() {
