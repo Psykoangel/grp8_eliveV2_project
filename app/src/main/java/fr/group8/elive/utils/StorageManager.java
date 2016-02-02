@@ -14,10 +14,13 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import fr.group8.elive.models.DataUser;
 import ru.noties.storm.DatabaseManager;
@@ -30,7 +33,6 @@ import ru.noties.storm.query.Selection;
  */
 public class StorageManager {
     private static StorageManager ourInstance = new StorageManager();
-
     public static StorageManager Instance() {
         return ourInstance;
     }
@@ -40,16 +42,117 @@ public class StorageManager {
     public final Boolean IS_DEBUG = true;
     public final int DB_VERSION = 1;
     public final int FILE_MAX_USER_NUMBER = 500;
+    public Context mContext;
+    public Boolean isContextloaded;
+
     private DatabaseManager dbManager;
-    private boolean dbReady;
+    private int fileNumberCount;
+
+    private boolean isDbReady;
 
 
     private StorageManager() {
         dbManager = null;
-        dbReady = false;
+        isDbReady = false;
+
+        mContext = null;
+        isContextloaded = false;
+
+        fileNumberCount = 0;
     }
 
-    public void loadJsonDataFile(String fileName) {
+    public void loadContext(Context context) {
+        mContext = context;
+        isContextloaded = true;
+
+        contextDependantAssignations();
+    }
+
+    private void contextDependantAssignations() {
+
+        try {
+            fileNumberCount = mContext.getFilesDir().listFiles().length;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /*
+      Method used to store input data to the index SQLite database
+      on the first part and the complete object in a common JSON file
+      in the application directory. Should be run on background.
+     */
+    public void storeJsonData(InputStream is) {
+
+        // Search for the uniqId in the Stream
+        String uniqId = searchInDataStream(is, "uniqId");
+
+        // Search in indexDB if already checked once
+        // and retrive fileName if checked once.
+
+            // Retrieve private file
+
+            // load private file as Json Object
+
+            // Change the targeted Json Object
+
+        // if uniqId is not indexed
+        // Create index Entry
+
+        // Retrieve last created file
+        // "elivedata.{fileNumberCount}.json"
+
+        // load last file in memory as Json Object
+
+        // if last file content equals FILE_MAX_USER_NUMBER
+        // free memory, increment fileNumberCount and create a new file
+        // Put default template to new file
+
+        // Load file as Json Object
+
+        // Add the incoming json object to file
+
+        // if no exception, commit index Entry
+
+    }
+
+    private String searchInDataStream(InputStream is, String uniqId) {
+        JsonReader reader = null;
+        Boolean found = false;
+        try {
+            reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
+            reader.beginObject();
+
+            while (reader.hasNext() && !found) {
+                
+                String token = reader.nextName();
+                if (token.contentEquals(uniqId)) {
+                    found = true;
+                    reader.close();
+                    return reader.nextString();
+                } else reader.skipValue();
+
+            }
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (reader != null)
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return null;
+    }
+
+    private void loadJsonDataFile(String fileName) throws FileNotFoundException {
+        File selectedFile = mContext.getFileStreamPath(fileName);
+
+        if (!selectedFile.exists()) throw new FileNotFoundException("File not found on internal storage");
 
     }
 
@@ -63,7 +166,7 @@ public class StorageManager {
             jsonObj = new JSONObject(strFileJson);
 
         } catch (JSONException e) {
-            e.printStackTrace();
+            if (isContextloaded) AlertHelper.showAlert(mContext, "Error", "JsonObject Parsing Error");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,7 +197,7 @@ public class StorageManager {
         while ((line = reader.readLine()) != null) {
             sb.append(line).append("\n");
         }
-        
+
         return sb.toString();
     }
 
@@ -104,6 +207,8 @@ public class StorageManager {
         try {
 
             if(!file.exists()){
+                FileOutputStream fos = mContext.openFileOutput(file.getName(), Context.MODE_PRIVATE);
+                fos.close();
                 file.createNewFile();
             }
 
@@ -146,10 +251,10 @@ public class StorageManager {
     }
 
     public void createDataBase(Context context) {
-        if (!dbReady)
+        if (!isDbReady)
         {
             Storm.getInstance().init(context, IS_DEBUG);
-            dbReady = true;
+            isDbReady = true;
         }
     }
 
