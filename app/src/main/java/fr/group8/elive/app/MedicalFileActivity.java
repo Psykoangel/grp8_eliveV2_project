@@ -1,12 +1,14 @@
 package fr.group8.elive.app;
 
+import android.content.DialogInterface;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -17,8 +19,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
-import android.widget.TextView;
 
 public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -36,6 +38,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +65,9 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
+
 
 
 
@@ -80,7 +86,10 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu);
+        menu.add("NFC").setIcon(R.drawable.ic_menu_gallery);
+
+
         return true;
     }
 
@@ -92,7 +101,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.test) {
             return true;
         }
 
@@ -126,6 +135,9 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
+        private ListView mListView;
+
+        public View rootView;
 
         public PlaceholderFragment() {
         }
@@ -145,22 +157,46 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
+
             if(getArguments().getInt(ARG_SECTION_NUMBER)==1)
             {
-                View rootView = inflater.inflate(R.layout.item_information, container, false);
-                return rootView;
+                rootView = inflater.inflate(R.layout.item_information, container, false);
+
             }else if(getArguments().getInt(ARG_SECTION_NUMBER)==2)
             {
-                View rootView = inflater.inflate(R.layout.item_medicament, container, false);
-                return rootView;
+                rootView = inflater.inflate(R.layout.frag_traitement, container, false);
+
             }else if(getArguments().getInt(ARG_SECTION_NUMBER)==3)
             {
-                View rootView = inflater.inflate(R.layout.item_alergie_maladie, container, false);
-                return rootView;
+                rootView = inflater.inflate(R.layout.item_alergie_maladie, container, false);
+
+
             }else{
-                View rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
-                return rootView;
+                rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
+
             }
+
+            android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(rootView.getContext());
+
+            if (mNfcAdapter == null) {
+                AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
+                alertDialog.setTitle("Alert");
+                alertDialog.setMessage(getString(R.string.msg_nonfc));
+                alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        });
+                alertDialog.show();
+            }
+            return rootView;
+        }
+
+        public void CreateListViewTraitement ()
+        {
+            mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
         }
     }
 
@@ -191,11 +227,11 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "SECTION 1";
+                    return "Information";
                 case 1:
-                    return "SECTION 2";
+                    return "Traitement";
                 case 2:
-                    return "SECTION 3";
+                    return "Alergie et maladie";
             }
             return null;
         }
