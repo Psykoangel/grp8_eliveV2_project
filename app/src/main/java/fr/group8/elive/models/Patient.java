@@ -7,18 +7,18 @@ import java.util.List;
  */
 public class Patient {
     private Integer id;
-    private String userForname;
-    private String userName;
+    private String patientForname;
+    private String patientName;
     private List<RelationShip> relationshipList;
-    private List<CmaObject> userCmaList;
+    private List<CmaObject> patientCmaList;
 
     public Patient(){
     }
 
-    public Patient(String userForname, String userName){
+    public Patient(String patientForname, String patientName){
         this.id = 0;
-        this.userForname = userForname;
-        this.userName = userName;
+        this.patientForname = patientForname;
+        this.patientName = patientName;
     }
 
     public Integer getId()
@@ -31,19 +31,19 @@ public class Patient {
     }
     public String getUserForname()
     {
-        return userForname;
+        return patientForname;
     }
     public void setUserForname(String userForname)
     {
-        this.userForname = userForname;
+        this.patientForname = userForname;
     }
     public String getUserName()
     {
-        return userName;
+        return patientName;
     }
     public void setUserName(String userName)
     {
-        this.userName = userName;
+        this.patientName = userName;
     }
     public List<RelationShip> getRelationshipList()
     {
@@ -55,22 +55,22 @@ public class Patient {
     }
 
     public List<CmaObject> getUserCmaList() {
-        return userCmaList;
+        return patientCmaList;
     }
 
     public void setUserCmaList(List<CmaObject> userCmaList) {
-        this.userCmaList = userCmaList;
+        this.patientCmaList = userCmaList;
     }
 
     public Boolean validate(){
-        return !(userName.isEmpty() || userForname.isEmpty());
+        return !(patientName.isEmpty() || patientForname.isEmpty());
     }
 
     @Override
     public String toString()
     {
-        return "User [id=" + id + ", userForname=" + userForname + ", " +
-                "userName=" + userName + ", relationShips= [" + relationshipList + "], cma=[" + userCmaList + "]]";
+        return "User [id=" + id + ", userForname=" + patientForname + ", " +
+                "userName=" + patientName + ", relationShips= [" + relationshipList + "], cma=[" + patientCmaList + "]]";
     }
 
     public class RelationShip {
