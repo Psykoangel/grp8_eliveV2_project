@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteException;
 import android.util.JsonReader;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;
 
 import org.json.JSONException;
@@ -23,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import fr.group8.elive.models.DataUser;
+import fr.group8.elive.models.User;
 import ru.noties.storm.DatabaseManager;
 import ru.noties.storm.Storm;
 import ru.noties.storm.exc.StormException;
@@ -37,15 +39,18 @@ public class StorageManager {
         return ourInstance;
     }
 
-    public static String appFileName = "elive_app_data.json";
+    public final static String APP_FILE_NAME = "elivedata.";
+    public final static String APP_FILE_EXTENSION = "json";
 
     public final Boolean IS_DEBUG = true;
     public final int DB_VERSION = 1;
     public final int FILE_MAX_USER_NUMBER = 500;
     public Context mContext;
-    public Boolean isContextloaded;
+    public Boolean isContextLoaded;
+    public Boolean isJsonParserReady;
 
     private DatabaseManager dbManager;
+    private Gson gson;
     private int fileNumberCount;
 
     private boolean isDbReady;
@@ -56,14 +61,17 @@ public class StorageManager {
         isDbReady = false;
 
         mContext = null;
-        isContextloaded = false;
+        isContextLoaded = false;
+
+        gson = null;
+        isJsonParserReady = false;
 
         fileNumberCount = 0;
     }
 
     public void loadContext(Context context) {
         mContext = context;
-        isContextloaded = true;
+        isContextLoaded = true;
 
         contextDependantAssignations();
     }
@@ -75,12 +83,21 @@ public class StorageManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        try {
+            GsonBuilder builder = new GsonBuilder();
+            // builder.registerTypeAdapter(RelationShip.class, new RelationShipInstanceCreator());
+            // builder.registerTypeAdapter(CmaObject.class, new CmaObjectInstanceCreator());
+            gson = builder.create();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /*
-      Method used to store input data to the index SQLite database
-      on the first part and the complete object in a common JSON file
-      in the application directory. Should be run on background.
+     * Method used to store input data to the index SQLite database
+     * on the first part and the complete object in a common JSON file
+     * in the application directory. Should be run on background.
      */
     public void storeJsonData(InputStream is) {
 
@@ -88,24 +105,46 @@ public class StorageManager {
         String uniqId = searchInDataStream(is, "uniqId");
 
         // Search in indexDB if already checked once
-        // and retrive fileName if checked once.
+        // and retrieve fileName if checked once.
+        DataUser existingUser = select(uniqId);
 
+        if (existingUser != null) {
             // Retrieve private file
-
-            // load private file as Json Object
+            String fileName = existingUser.getFileLocation();
 
             // Change the targeted Json Object
+            changeExistingUserInJsonFile(
+                    fileName,
+                    translateJsonToObject(User.class, is)
+            );
 
+        }
         // if uniqId is not indexed
         // Create index Entry
+        DataUser newEntry = new DataUser(uniqId);
+        Boolean validateEntry = true;
 
         // Retrieve last created file
         // "elivedata.{fileNumberCount}.json"
+        if (fileNumberCount == 0) fileNumberCount++;
+
+        String fileName = APP_FILE_NAME
+                + fileNumberCount
+                + "."
+                + APP_FILE_EXTENSION;
 
         // load last file in memory as Json Object
+        File file = null;
+        try {
+            file = loadJsonDataFile(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
         // if last file content equals FILE_MAX_USER_NUMBER
         // free memory, increment fileNumberCount and create a new file
+
+
         // Put default template to new file
 
         // Load file as Json Object
@@ -113,7 +152,23 @@ public class StorageManager {
         // Add the incoming json object to file
 
         // if no exception, commit index Entry
+        if (validateEntry) insert(newEntry);
+    }
 
+    private void changeExistingUserInJsonFile(String fileName, User user) {
+        // load private file as Json Object
+        File file = null;
+        try {
+            file = loadJsonDataFile(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private <T> T translateJsonToObject(Class<T> classType, InputStream is) {
+
+        return gson.fromJson(new InputStreamReader(is), classType);
     }
 
     private String searchInDataStream(InputStream is, String uniqId) {
@@ -124,7 +179,7 @@ public class StorageManager {
             reader.beginObject();
 
             while (reader.hasNext() && !found) {
-                
+
                 String token = reader.nextName();
                 if (token.contentEquals(uniqId)) {
                     found = true;
@@ -149,11 +204,12 @@ public class StorageManager {
         return null;
     }
 
-    private void loadJsonDataFile(String fileName) throws FileNotFoundException {
+    private File loadJsonDataFile(String fileName) throws FileNotFoundException {
         File selectedFile = mContext.getFileStreamPath(fileName);
 
         if (!selectedFile.exists()) throw new FileNotFoundException("File not found on internal storage");
 
+        return selectedFile;
     }
 
     private void addDataToJsonFile(File fileJson) {
@@ -166,7 +222,7 @@ public class StorageManager {
             jsonObj = new JSONObject(strFileJson);
 
         } catch (JSONException e) {
-            if (isContextloaded) AlertHelper.showAlert(mContext, "Error", "JsonObject Parsing Error");
+            if (isContextLoaded) AlertHelper.showAlert(mContext, "Error", "JsonObject Parsing Error");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -250,18 +306,31 @@ public class StorageManager {
         }
     }
 
-    public void createDataBase(Context context) {
+    public void createDataBase(Context context) throws StormException {
         if (!isDbReady)
         {
-            Storm.getInstance().init(context, IS_DEBUG);
-            isDbReady = true;
+            try {
+                Storm.getInstance().init(context, IS_DEBUG);
+                isDbReady = true;
+            } catch (Exception e) {
+                throw new StormException("Storm already initiated.");
+            }
         }
     }
 
     public void initiateDBManager(Context context, String dbName) {
         this.closeDBManager();
 
-        dbManager = new DatabaseManager(context, dbName, DB_VERSION, null);
+        Class<?> [] types = {
+                DataUser.class
+        };
+
+        dbManager = new DatabaseManager(
+                context,
+                dbName,
+                DB_VERSION,
+                types
+        );
 
         try {
             dbManager.open();

@@ -1,8 +1,5 @@
 package fr.group8.elive.models;
 
-import android.text.format.DateUtils;
-
-import java.sql.Time;
 import java.util.Date;
 
 import ru.noties.storm.anno.Autoincrement;
@@ -35,10 +32,41 @@ public class DataUser {
     @DBNonNull
     private Date lastUpdate;
 
-    public DataUser(String uniqId, String filename) {
-        this.uniqId = uniqId;
-        this.fileLocation = filename;
-        this.lastUpdate = new Date();
+    public DataUser(String uniqId) {
+        this.setUniqId(uniqId);
+        this.setLastUpdate(new Date());
     }
 
+    public DataUser(String uniqId, String filename) {
+        this(uniqId);
+        this.setFileLocation(filename);
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public String getUniqId() {
+        return uniqId;
+    }
+
+    public void setUniqId(String uniqId) {
+        this.uniqId = uniqId;
+    }
+
+    public String getFileLocation() {
+        return fileLocation;
+    }
+
+    public void setFileLocation(String fileLocation) {
+        this.fileLocation = fileLocation;
+    }
+
+    public Date getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
 }
