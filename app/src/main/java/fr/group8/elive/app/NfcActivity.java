@@ -13,7 +13,6 @@ public class NfcActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nfc);
 
         try {
             NfcWrapper.Instance().setNfcAdapter(this);

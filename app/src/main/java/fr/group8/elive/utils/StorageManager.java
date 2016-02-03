@@ -85,44 +85,7 @@ public class StorageManager {
         }
     }
 
-    public void insert(DataUser user) {
-        if (!this.dbManager.isOpen())
-            throw new SQLiteException("DbManager has not been instanciated yet");
-        try {
-            Storm.newInsert(dbManager).insert(user);
-        } catch (StormException e) {
-            e.printStackTrace();
-        }
-    }
 
-    public void createDataBase(Context context) {
-        if (!dbReady)
-        {
-            Storm.getInstance().init(context, IS_DEBUG);
-            dbReady = true;
-        }
-    }
-
-    public void initiateDBManager(Context context, String dbName) {
-        this.closeDBManager();
-
-        dbManager = new DatabaseManager(context, dbName, DB_VERSION, null);
-
-        try {
-            dbManager.open();
-        } catch (SQLiteException e) {
-            dbManager = null;
-            e.printStackTrace();
-        }
-    }
-
-    public void closeDBManager() {
-        if (dbManager != null
-                && dbManager.isOpen()) {
-            dbManager.close();
-            dbManager = null;
-        }
-    }
 
     public void insert(DataUser user) {
         if (!this.dbManager.isOpen())
