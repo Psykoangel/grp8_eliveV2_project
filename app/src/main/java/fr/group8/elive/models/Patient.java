@@ -1,5 +1,6 @@
 package fr.group8.elive.models;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -7,172 +8,158 @@ import java.util.List;
  */
 public class Patient {
     private Integer id;
-    private String patientForname;
-    private String patientName;
-    private List<RelationShip> relationshipList;
-    private List<CmaObject> patientCmaList;
+    private Information information;
+    private List<Traitement> listTraitement;
+    private List<AlergieMaladie> listAlergieMaladie;
+
 
     public Patient(){
     }
 
-    public Patient(String patientForname, String patientName){
+    public Patient(Information information, List<Traitement> listTraitement, List<AlergieMaladie> listAlergieMaladie){
         this.id = 0;
-        this.patientForname = patientForname;
-        this.patientName = patientName;
+        this.listTraitement = listTraitement;
+        this.information = information;
+        this.listAlergieMaladie = listAlergieMaladie;
     }
 
-    public Integer getId()
-    {
+    public Integer getId(){
         return id;
     }
-    public void setId(Integer id)
-    {
+
+    public void setId(Integer id){
         this.id = id;
     }
-    public String getUserForname()
-    {
-        return patientForname;
-    }
-    public void setUserForname(String userForname)
-    {
-        this.patientForname = userForname;
-    }
-    public String getUserName()
-    {
-        return patientName;
-    }
-    public void setUserName(String userName)
-    {
-        this.patientName = userName;
-    }
-    public List<RelationShip> getRelationshipList()
-    {
-        return relationshipList;
-    }
-    public void setRelationshipList(List<RelationShip> relationshipList)
-    {
-        this.relationshipList = relationshipList;
+
+    public Information getInformation() {
+        return information;
     }
 
-    public List<CmaObject> getUserCmaList() {
-        return patientCmaList;
+    public List<AlergieMaladie> getListAlergieMaladie() {
+        return listAlergieMaladie;
     }
 
-    public void setUserCmaList(List<CmaObject> userCmaList) {
-        this.patientCmaList = userCmaList;
+    public List<Traitement> getListTraitement() {
+        return listTraitement;
     }
 
-    public Boolean validate(){
-        return !(patientName.isEmpty() || patientForname.isEmpty());
+    public void setInformation(Information information) {
+        this.information = information;
     }
 
-    @Override
-    public String toString()
-    {
-        return "User [id=" + id + ", userForname=" + patientForname + ", " +
-                "userName=" + patientName + ", relationShips= [" + relationshipList + "], cma=[" + patientCmaList + "]]";
+    public void setListAlergieMaladie(List<AlergieMaladie> listAlergieMaladie) {
+        this.listAlergieMaladie = listAlergieMaladie;
     }
 
-    public class RelationShip {
-        private String entourageForname;
-        private String entourageName;
-        private Integer relationshipTypeCode;
+    public void setListTraitement(List<Traitement> listTraitement) {
+        this.listTraitement = listTraitement;
+    }
 
-        public RelationShip(String forname, String name, Integer type){
-            this.entourageForname = forname;
-            this.entourageName = name;
-            this.relationshipTypeCode = type;
+
+    //**********************************************
+    //**************Object Information**************
+    //**********************************************
+
+
+    public class Information{
+        private String sNomPatient;
+        private String sPrenomPatient;
+        private String sAdresse;
+        private String sGrouppeSanguin;
+
+        public Information(String sNomPatient, String sPrenomPatient, String sAdresse, String sGrouppeSanguin){
+            this.sNomPatient = sNomPatient;
+            this.sAdresse = sAdresse;
+            this.sPrenomPatient = sPrenomPatient;
+            this.sGrouppeSanguin = sGrouppeSanguin;
         }
 
-        public RelationShip() {
-
+        public String getsAdresse() {
+            return sAdresse;
         }
 
-        public String getEntourageForname() {
-            return entourageForname;
+        public String getsGrouppeSanguin() {
+            return sGrouppeSanguin;
         }
 
-        public String getEntourageName() {
-            return entourageName;
+        public String getsNomPatient() {
+            return sNomPatient;
         }
 
-        public String getRelationshipTypeCode() {
-            return relationshipTypeCode == 11 ? "Père" : "Mère";
+        public String getsPrenomPatient() {
+            return sPrenomPatient;
         }
 
-        public void setEntourageForname(String entourageForname) {
-            this.entourageForname = entourageForname;
+        public void setsAdresse(String sAdresse) {
+            this.sAdresse = sAdresse;
         }
 
-        public void setEntourageName(String entourageName) {
-            this.entourageName = entourageName;
+        public void setsGrouppeSanguin(String sGrouppeSanguin) {
+            this.sGrouppeSanguin = sGrouppeSanguin;
         }
 
-        public void setRelationshipTypeCode(Integer relationshipTypeCode) {
-            this.relationshipTypeCode = relationshipTypeCode;
+        public void setsNomPatient(String sNomPatient) {
+            this.sNomPatient = sNomPatient;
         }
 
-        @Override
-        public String toString()
-        {
-            return "RelationShip [entourageForname=" + entourageForname + ", entourageName=" + entourageName + ", " +
-                    "relationshipTypeCode=" + this.getRelationshipTypeCode() + "]";
+        public void setsPrenomPatient(String sPrenomPatient) {
+            this.sPrenomPatient = sPrenomPatient;
         }
     }
 
-    public class CmaObject {
-        private String cmaCode1;
-        private String cmaCode2;
-        private String cmaLevel;
-        private String cmaValue;
 
-        public CmaObject(String code1, String code2, String level, String value){
-            this.cmaCode1 = code1;
-            this.cmaCode2 = code2;
-            this.cmaLevel = level;
-            this.cmaValue = value;
+    //*********************************************
+    //**************Object Traitement**************
+    //*********************************************
+
+
+
+    public class Traitement{
+        private String sMedicament;
+        public Traitement(String sMedicament){
+            this.sMedicament = sMedicament;
         }
 
-        public CmaObject() {
-
+        public String getsMedicament() {
+            return sMedicament;
         }
 
-        public String getCmaCode1() {
-            return cmaCode1;
-        }
-
-        public void setCmaCode1(String cmaCode1) {
-            this.cmaCode1 = cmaCode1;
-        }
-
-        public String getCmaCode2() {
-            return cmaCode2;
-        }
-
-        public void setCmaCode2(String cmaCode2) {
-            this.cmaCode2 = cmaCode2;
-        }
-
-        public String getCmaLevel() {
-            return cmaLevel;
-        }
-
-        public void setCmaLevel(String cmaLevel) {
-            this.cmaLevel = cmaLevel;
-        }
-
-        public String getCmaValue() {
-            return cmaValue;
-        }
-
-        public void setCmaValue(String cmaValue) {
-            this.cmaValue = cmaValue;
-        }
-
-        @Override
-        public String toString() {
-            return "CmaObject [cmaCode1=" + cmaCode1 + ", cmaCode2=" + cmaCode2 + ", " +
-                    "cmaLevel=" + cmaLevel + ", cmaValue=" + cmaValue + "]";
+        public void setsMedicament(String sMedicament) {
+            this.sMedicament = sMedicament;
         }
     }
+
+    //************************************************
+    //**************Object AlergieMaladie*************
+    //************************************************
+
+
+
+    public class AlergieMaladie{
+        private String sAlergieMaladie;
+        private Date dDate;
+
+        public AlergieMaladie(String sAlergieMaladie,Date dDate){
+            this.dDate = dDate;
+            this.sAlergieMaladie = sAlergieMaladie;
+        }
+
+        public Date getdDate() {
+            return dDate;
+        }
+
+        public String getsAlergieMaladie() {
+            return sAlergieMaladie;
+        }
+
+        public void setdDate(Date dDate) {
+            this.dDate = dDate;
+        }
+
+        public void setsAlergieMaladie(String sAlergieMaladie) {
+            this.sAlergieMaladie = sAlergieMaladie;
+        }
+    }
+
+
 }
