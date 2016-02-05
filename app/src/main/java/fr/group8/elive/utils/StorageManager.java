@@ -318,6 +318,7 @@ public class StorageManager {
         }
     }
 
+
     public void initiateDBManager(Context context, String dbName) {
         this.closeDBManager();
 
@@ -348,6 +349,8 @@ public class StorageManager {
         }
     }
 
+
+
     public void insert(DataUser user) {
         if (!this.dbManager.isOpen())
             throw new SQLiteException("DbManager has not been instanciated yet");
@@ -357,7 +360,7 @@ public class StorageManager {
             e.printStackTrace();
         }
     }
-
+    
     public void insert(String uniqId, String fileName) {
         this.insert(new DataUser(uniqId, fileName));
     }

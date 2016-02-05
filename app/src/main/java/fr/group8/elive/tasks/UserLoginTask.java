@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 
 import fr.group8.elive.app.LoginActivity;
-import fr.group8.elive.app.NfcActivity;
+import fr.group8.elive.app.MedicalFileActivity;
 import fr.group8.elive.app.R;
 
 /**
@@ -65,7 +65,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
         mActivity.showProgress(false);
 
         if (success) {
-            Intent intent = new Intent(mActivity, NfcActivity.class);
+            Intent intent = new Intent(mActivity, MedicalFileActivity.class);
             mActivity.startActivity(intent);
         } else {
             mActivity.getmPasswordView().setError(mActivity.getString(R.string.error_incorrect_password));
