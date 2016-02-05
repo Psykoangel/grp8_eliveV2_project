@@ -61,17 +61,26 @@ public class Patient {
     //**********************************************
 
 
-    public class Information{
+    public static class Information{
         private String sNomPatient;
         private String sPrenomPatient;
         private String sAdresse;
         private String sGrouppeSanguin;
+        private String sNomPerePatient;
+        private String sPrenomPerePatient;
+        private String sNomMerePatient;
+        private String sPrenomMerePatient;
 
-        public Information(String sNomPatient, String sPrenomPatient, String sAdresse, String sGrouppeSanguin){
+
+        public Information(String sNomPatient, String sPrenomPatient, String sAdresse, String sGrouppeSanguin, String sNomPerePatient,String sPrenomPerePatient,String sNomMerePatient,String sPrenomMerePatient){
             this.sNomPatient = sNomPatient;
             this.sAdresse = sAdresse;
             this.sPrenomPatient = sPrenomPatient;
             this.sGrouppeSanguin = sGrouppeSanguin;
+            this.sNomPerePatient = sNomPerePatient;
+            this.sPrenomPerePatient = sPrenomPerePatient;
+            this.sNomMerePatient =sNomMerePatient;
+            this.sPrenomMerePatient = sPrenomMerePatient;
         }
 
         public String getsAdresse() {
@@ -90,6 +99,22 @@ public class Patient {
             return sPrenomPatient;
         }
 
+        public String getsNomMerePatient() {
+            return sNomMerePatient;
+        }
+
+        public String getsNomPerePatient() {
+            return sNomPerePatient;
+        }
+
+        public String getsPrenomMerePatient() {
+            return sPrenomMerePatient;
+        }
+
+        public String getsPrenomPerePatient() {
+            return sPrenomPerePatient;
+        }
+
         public void setsAdresse(String sAdresse) {
             this.sAdresse = sAdresse;
         }
@@ -105,6 +130,23 @@ public class Patient {
         public void setsPrenomPatient(String sPrenomPatient) {
             this.sPrenomPatient = sPrenomPatient;
         }
+
+        public void setsNomMerePatient(String sNomMerePatient) {
+            this.sNomMerePatient = sNomMerePatient;
+        }
+
+        public void setsNomPerePatient(String sNomPerePatient) {
+            this.sNomPerePatient = sNomPerePatient;
+        }
+
+        public void setsPrenomMerePatient(String sPrenomMerePatient) {
+            this.sPrenomMerePatient = sPrenomMerePatient;
+        }
+
+        public void setsPrenomPerePatient(String sPrenomPerePatient) {
+            this.sPrenomPerePatient = sPrenomPerePatient;
+        }
+
     }
 
 
@@ -114,7 +156,7 @@ public class Patient {
 
 
 
-    public class Traitement{
+    public static class Traitement{
         private String sMedicament;
         public Traitement(String sMedicament){
             this.sMedicament = sMedicament;
@@ -135,7 +177,7 @@ public class Patient {
 
 
 
-    public class AlergieMaladie{
+    public static class AlergieMaladie{
         private String sAlergieMaladie;
         private Date dDate;
 

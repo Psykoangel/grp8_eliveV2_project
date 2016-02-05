@@ -20,6 +20,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import fr.group8.elive.models.Patient;
+import fr.group8.elive.view.ItemAlergieMaladieAdapter;
+import fr.group8.elive.view.ItemTraitementAdapter;
 
 
 public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -136,7 +145,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private ListView mListView;
-
+        private Patient patient;
         public View rootView;
 
         public PlaceholderFragment() {
@@ -157,20 +166,62 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+            Patient hmatysiak = new Patient(
+                    new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK","Papa","MATYSIAK","Maman"),
+                    new ArrayList<Patient.Traitement>(){{
+                        add(new Patient.Traitement("Advil"));
+                        add(new Patient.Traitement("Ricola"));
+                    }},
+                    new ArrayList<Patient.AlergieMaladie>(){{
+                        add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
+                        add(new Patient.AlergieMaladie("Ricola", new Date()));
+                    }}
+            );
+
 
 
             if(getArguments().getInt(ARG_SECTION_NUMBER)==1)
             {
                 rootView = inflater.inflate(R.layout.item_information, container, false);
+                TextView tvNom = (TextView) rootView.findViewById(R.id.nom);
+                TextView tvPrenom = (TextView) rootView.findViewById(R.id.prenom);
+                TextView tvAdresse = (TextView) rootView.findViewById(R.id.adresse);
+                TextView tvGrouppeSanguin = (TextView) rootView.findViewById(R.id.groupe_sanguin);
+                TextView tvMere = (TextView) rootView.findViewById(R.id.mere);
+                TextView tvPere = (TextView) rootView.findViewById(R.id.pere);
+
+                tvAdresse.setText(hmatysiak.getInformation().getsAdresse());
+                tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+" " +hmatysiak.getInformation().getsGrouppeSanguin());
+                tvNom.setText(hmatysiak.getInformation().getsNomPatient());
+                tvPrenom.setText(hmatysiak.getInformation().getsPrenomPatient());
+                tvPere.setText(getString(R.string.pere)+" " + hmatysiak.getInformation().getsNomPerePatient()+" "+hmatysiak.getInformation().getsPrenomPerePatient());
+                tvMere.setText(getString(R.string.mere) +" "+ hmatysiak.getInformation().getsNomMerePatient()+" "+hmatysiak.getInformation().getsPrenomMerePatient());
+                //tvPrenom.setText(getString(R.string.prenom)+patient.getInformation().getsPrenomPatient());
+                //tvNom.setText(getString(R.string.nom)+patient.getInformation().getsNomPatient());
+                //tvAdresse.setText(getString(R.string.adress)+patient.getInformation().getsAdresse());
+                //tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+patient.getInformation().getsGrouppeSanguin());
+
 
             }else if(getArguments().getInt(ARG_SECTION_NUMBER)==2)
             {
                 rootView = inflater.inflate(R.layout.frag_traitement, container, false);
+                mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
+                List<Patient.Traitement> traitements = hmatysiak.getListTraitement();
+                ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(),traitements);
+                if (mListView != null || adapter != null){
+                    mListView.setAdapter(adapter);
+                }
+
 
             }else if(getArguments().getInt(ARG_SECTION_NUMBER)==3)
             {
-                rootView = inflater.inflate(R.layout.item_alergie_maladie, container, false);
-
+                rootView = inflater.inflate(R.layout.frag_alergie_maladie, container, false);
+                mListView = (ListView) rootView.findViewById(R.id.listViewAlergieMaladie);
+                List<Patient.AlergieMaladie> alergieMaladies = hmatysiak.getListAlergieMaladie();
+                ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(),alergieMaladies);
+                if (mListView != null || adapter != null){
+                    mListView.setAdapter(adapter);
+                }
 
             }else{
                 rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
@@ -192,11 +243,6 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 alertDialog.show();
             }
             return rootView;
-        }
-
-        public void CreateListViewTraitement ()
-        {
-            mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
         }
     }
 
@@ -235,5 +281,6 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
             }
             return null;
         }
+
     }
 }

@@ -33,4 +33,7 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_medical_file">MedicalFileActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="pere">Père : </string>
+    <string name="mere">Mère : </string>
+    <string name="groupe_sanguin">Groupe sanguin : </string>
 </resources>

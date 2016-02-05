@@ -9,18 +9,17 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import fr.group8.elive.app.R;
-import fr.group8.elive.models.ItemAlergieMaladie;
+import fr.group8.elive.models.Patient;
 
 /**
  * Created by chriis on 03/02/2016.
  */
-public class ItemAlergieMaladieAdapter extends ArrayAdapter<ItemAlergieMaladie> {
-    public ItemAlergieMaladieAdapter(Context context, List<ItemAlergieMaladie> items){super(context,0,items);
+public class ItemAlergieMaladieAdapter extends ArrayAdapter<Patient.AlergieMaladie> {
+    public ItemAlergieMaladieAdapter(Context context, List<Patient.AlergieMaladie> items){super(context,0,items);
     }
 
     @Override
@@ -36,10 +35,10 @@ public class ItemAlergieMaladieAdapter extends ArrayAdapter<ItemAlergieMaladie> 
             convertView.setTag(viewHolder);
         }
 
-        ItemAlergieMaladie itemAlergieMaladie = getItem(position);
-        viewHolder.text.setText(itemAlergieMaladie.getsNomMaladie());
+        Patient.AlergieMaladie AlergieMaladie = getItem(position);
+        viewHolder.text.setText(AlergieMaladie.getsAlergieMaladie());
         DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-        Date dDate = itemAlergieMaladie.getdDateMaladie();
+        Date dDate = AlergieMaladie.getdDate();
         String reportDate = df.format(dDate);
         viewHolder.date.setText(reportDate);
 
