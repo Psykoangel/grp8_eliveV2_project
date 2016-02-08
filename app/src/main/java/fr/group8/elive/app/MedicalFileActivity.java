@@ -1,6 +1,10 @@
 package fr.group8.elive.app;
 
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
@@ -21,6 +25,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import fr.group8.elive.exceptions.NfcException;
+import fr.group8.elive.utils.AlertHelper;
+import fr.group8.elive.utils.NfcWrapper;
+import fr.group8.elive.utils.StorageManager;
+import ru.noties.storm.exc.StormException;
+
 
 public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
@@ -39,6 +49,58 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
      */
     private ViewPager mViewPager;
 
+    // Defines the single acces to the Storage Manager object
+    // Handles the SQLite and private files management
+    private StorageManager stManager;
+    // Defines the Internet Access Connection Status as a boolean value
+    private boolean isConnected;
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        AlertHelper.showAlert(this, getString(R.string.general_title_info), getString(R.string.nfc_tag_detected));
+
+        String userId = null;
+
+        try {
+            userId = NfcWrapper.Instance().handleTagIntent(intent);
+        } catch (NfcException e) {
+            e.printStackTrace();
+        }
+
+        AlertHelper.showAlert(this, "DEBUG", "UserId : " + userId);
+
+        if (userId != null && !userId.isEmpty())
+        {
+            if (isConnected) {
+
+            } else {
+
+            }
+        }
+    }
+
+    private void checkInternetStatus() {
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        NfcWrapper.Instance().desactivateForegroundIntentCatching(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        NfcWrapper.Instance().activateForegroundIntentCatching(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,8 +130,23 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
+        checkInternetStatus();
 
+        try {
+            NfcWrapper.Instance().setNfcAdapter(this);
+            NfcWrapper.Instance().activateForegroundIntentCatching(this);
+        } catch (NfcException e) {
+            e.printStackTrace();
+        }
 
+        stManager = new StorageManager();
+        stManager.loadContext(this);
+        try {
+            stManager.createDataBase(this);
+        } catch (StormException e) {
+            e.printStackTrace();
+        }
+        stManager.initiateDBManager(this, StorageManager.APP_DB_NAME);
 
     }
 
