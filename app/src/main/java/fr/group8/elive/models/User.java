@@ -5,9 +5,14 @@ package fr.group8.elive.models;
  */
 public class User {
 
+    private String uniqId;
+
     public User() {
 
     }
 
 
+    public String getUniqId() {
+        return uniqId;
+    }
 }
