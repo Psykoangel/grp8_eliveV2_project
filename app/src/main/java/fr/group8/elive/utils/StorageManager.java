@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,39 +36,47 @@ import static android.content.Context.MODE_PRIVATE;
  */
 public class StorageManager {
     private static StorageManager ourInstance = new StorageManager();
+    // Single Instance of StorageManager
     public static StorageManager Instance() {
         return ourInstance;
     }
 
+    // Name of the private files of the application
     public final static String APP_FILE_NAME = "elivedata";
+    // Separator of the file name's information
     public final static String APP_FILE_SEPARATOR = ".";
+    // Final extension of each private files of the application
     public final static String APP_FILE_EXTENSION = "json";
+    // Name of the SQLite Database for the application
+    public final static String APP_DB_NAME = "elivedb";
 
+    // Specify the Debug State of the StorageManager
     public final Boolean IS_DEBUG = true;
+    // Specify the version of the SQLite Database Version
     public final int DB_VERSION = 1;
+    // Default Maximal user object per private file of the app
     public final int FILE_MAX_USER_NUMBER = 500;
-    public Context mContext;
+    // Boolean that defines if a context has been registered in the mContext variable
     public Boolean isContextLoaded;
+    // Boolean that defines if the Gson parser has been correctly initialised
     public Boolean isJsonParserReady;
 
+    // Default search string to count in the file or for search functions
     private final String SEARCH_DELTA = "userUniqId";
-
+    // Reference to a context activity
+    private Context mContext;
     private DatabaseManager dbManager;
-    private Gson gson;
     private int fileNumberCount;
 
     private boolean isDbReady;
 
 
-    private StorageManager() {
+    public StorageManager() {
         dbManager = null;
         isDbReady = false;
 
         mContext = null;
         isContextLoaded = false;
-
-        gson = null;
-        isJsonParserReady = false;
 
         fileNumberCount = 0;
     }
@@ -83,15 +92,6 @@ public class StorageManager {
 
         try {
             fileNumberCount = mContext.getFilesDir().listFiles().length;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
-            GsonBuilder builder = new GsonBuilder();
-            // builder.registerTypeAdapter(RelationShip.class, new RelationShipInstanceCreator());
-            // builder.registerTypeAdapter(CmaObject.class, new CmaObjectInstanceCreator());
-            gson = builder.create();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -186,7 +186,7 @@ public class StorageManager {
         );
 
         try {
-            createUserInJsonFile(fileName, translateJsonToObject(User.class, is));
+            createUserInJsonFile(fileName, JsonHelper.Instance().translateJsonToObject(User.class, is));
         } catch (Exception e) {
             e.printStackTrace();
             validateEntry = false;
@@ -211,7 +211,7 @@ public class StorageManager {
 
         try {
             List<User> usersList = new ArrayList<User>();
-            usersList = translateJsonToObject(usersList.getClass(), getStringFromFile(file));
+            usersList = JsonHelper.Instance().translateJsonToObject(usersList.getClass(), getStringFromFile(file));
 
             if (usersList != null && usersList.size() > 0) {
                 usersList.add(user);
@@ -240,7 +240,7 @@ public class StorageManager {
         // Change the targeted Json Object
         changeExistingUserInJsonFile(
                 fileName,
-                translateJsonToObject(User.class, is)
+                JsonHelper.Instance().translateJsonToObject(User.class, is)
         );
 
         // Update index entry
@@ -259,7 +259,7 @@ public class StorageManager {
 
         try {
             List<User> usersList = new ArrayList<User>();
-            usersList = translateJsonToObject(usersList.getClass(), getStringFromFile(file));
+            usersList = JsonHelper.Instance().translateJsonToObject(usersList.getClass(), getStringFromFile(file));
 
             if (usersList != null && usersList.size() > 0) {
                 usersList = changeExistingUser(usersList, user);
@@ -304,17 +304,8 @@ public class StorageManager {
         return null;
     }
 
-    private <T> T translateJsonToObject(Class<T> classType, String input) {
-        return gson.fromJson(new StringReader(input), classType);
-    }
-
-    private <T> T translateJsonToObject(Class<T> classType, InputStream is) {
-
-        return gson.fromJson(new InputStreamReader(is), classType);
-    }
-
     private String translateObjectToJson(Object obj, Class classType) {
-        return gson.toJson(obj, classType);
+        return JsonHelper.Instance().toJson(obj, classType);
     }
 
     private String searchInDataStream(InputStream is, String uniqId) {
@@ -426,6 +417,28 @@ public class StorageManager {
             e.printStackTrace();
         }
 
+        return null;
+    }
+
+    public User searchUser(String identifier) {
+        // Search in indexDB if already checked once
+        // and retrieve fileName if checked once.
+        DataUser existingUser = select(identifier);
+
+        if (existingUser == null) return null;
+
+        File file = mContext.getFileStreamPath(existingUser.getFileLocation());
+
+        return searchSpecificUserInFile(file, existingUser);
+    }
+
+    private User searchSpecificUserInFile(File file, DataUser user) {
+        try {
+            JsonReader reader = new JsonReader(new FileReader(file));
+            return JsonHelper.Instance().translateStreamToSearchedObject(User.class, reader, user.getUniqId());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 

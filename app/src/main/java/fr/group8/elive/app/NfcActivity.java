@@ -42,19 +42,16 @@ public class NfcActivity extends Activity {
 
         AlertHelper.showAlert(this, getString(R.string.general_title_info), getString(R.string.nfc_tag_detected));
 
-        Integer userId = 0;
+        String userId = null;
 
         try {
-            userId = Integer.parseInt(NfcWrapper.Instance().handleTagIntent(intent));
+            userId = NfcWrapper.Instance().handleTagIntent(intent);
         } catch (NfcException e) {
             e.printStackTrace();
         }
 
         AlertHelper.showAlert(this, "DEBUG", "UserId : " + userId.toString());
 
-        // Intent nfcInfo = new Intent(this, FolderActivity.class);
-        // nfcInfo.putExtra("user", "data");
 
-        // this.startActivity(nfcInfo);
     }
 }

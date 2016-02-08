@@ -31,7 +31,7 @@ public class NfcWrapper {
     private NfcAdapter mNfcAdapter;
     private Context mContext;
 
-    private NfcWrapper() {
+    public NfcWrapper() {
         mContext = null;
     }
 
