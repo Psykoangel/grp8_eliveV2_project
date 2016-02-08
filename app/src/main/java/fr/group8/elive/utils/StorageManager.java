@@ -2,26 +2,24 @@ package fr.group8.elive.utils;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteException;
-import android.util.JsonReader;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParser;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.google.gson.stream.JsonReader;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import fr.group8.elive.models.DataUser;
 import fr.group8.elive.models.User;
@@ -29,6 +27,8 @@ import ru.noties.storm.DatabaseManager;
 import ru.noties.storm.Storm;
 import ru.noties.storm.exc.StormException;
 import ru.noties.storm.query.Selection;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * Created by psyko on 18/01/16.
@@ -39,7 +39,8 @@ public class StorageManager {
         return ourInstance;
     }
 
-    public final static String APP_FILE_NAME = "elivedata.";
+    public final static String APP_FILE_NAME = "elivedata";
+    public final static String APP_FILE_SEPARATOR = ".";
     public final static String APP_FILE_EXTENSION = "json";
 
     public final Boolean IS_DEBUG = true;
@@ -48,6 +49,8 @@ public class StorageManager {
     public Context mContext;
     public Boolean isContextLoaded;
     public Boolean isJsonParserReady;
+
+    private final String SEARCH_DELTA = "userUniqId";
 
     private DatabaseManager dbManager;
     private Gson gson;
@@ -99,27 +102,33 @@ public class StorageManager {
      * on the first part and the complete object in a common JSON file
      * in the application directory. Should be run on background.
      */
-    public void storeJsonData(InputStream is) {
+    public void storeJsonData(InputStream is) throws Exception {
 
         // Search for the uniqId in the Stream
-        String uniqId = searchInDataStream(is, "uniqId");
+        String uniqId = searchInDataStream(is, SEARCH_DELTA);
 
         // Search in indexDB if already checked once
         // and retrieve fileName if checked once.
         DataUser existingUser = select(uniqId);
 
         if (existingUser != null) {
-            // Retrieve private file
-            String fileName = existingUser.getFileLocation();
-
-            // Change the targeted Json Object
-            changeExistingUserInJsonFile(
-                    fileName,
-                    translateJsonToObject(User.class, is)
-            );
-
+            try {
+                UpdateProcess(is, existingUser);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return;
         }
+
         // if uniqId is not indexed
+        try {
+            CreationProcess(uniqId, is);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void CreationProcess(String uniqId, InputStream is) throws Exception {
         // Create index Entry
         DataUser newEntry = new DataUser(uniqId);
         Boolean validateEntry = true;
@@ -129,11 +138,70 @@ public class StorageManager {
         if (fileNumberCount == 0) fileNumberCount++;
 
         String fileName = APP_FILE_NAME
+                + APP_FILE_SEPARATOR
                 + fileNumberCount
-                + "."
+                + APP_FILE_SEPARATOR
                 + APP_FILE_EXTENSION;
 
-        // load last file in memory as Json Object
+        // load last found file
+        File file = null;
+        try {
+            file = loadJsonDataFile(fileName);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            validateEntry = false;
+        }
+
+        if (file == null) return;
+
+        // if last file content equals FILE_MAX_USER_NUMBER
+        int count = 0;
+        try {
+            count = countJsonElementInStream(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            validateEntry = false;
+        }
+        // free memory as much as possible,
+        // increment fileNumberCount and create a new file
+        if (count > FILE_MAX_USER_NUMBER)
+            throw new Exception("File should not count more than " + FILE_MAX_USER_NUMBER + " Objects.");
+        else if (count == FILE_MAX_USER_NUMBER) {
+            file = null;
+            fileName = null;
+
+            fileName = APP_FILE_NAME
+                    + APP_FILE_SEPARATOR
+                    + ++fileNumberCount
+                    + APP_FILE_SEPARATOR
+                    + APP_FILE_EXTENSION;
+            file = createNewJsonFile(fileName);
+        }
+
+        // Put default template to new file
+        List<User> newList = new ArrayList<User>();
+        writeJsonDataFile(
+                translateObjectToJson(newList, newList.getClass()),
+                fileName
+        );
+
+        try {
+            createUserInJsonFile(fileName, translateJsonToObject(User.class, is));
+        } catch (Exception e) {
+            e.printStackTrace();
+            validateEntry = false;
+        }
+
+        // if no exception, commit index Entry
+        if (validateEntry) {
+            newEntry.setFileLocation(fileName);
+            newEntry.setLastUpdate(new Date());
+            insert(newEntry);
+        }
+    }
+
+    private void createUserInJsonFile(String fileName, User user) {
+        // Add the incoming json object to file
         File file = null;
         try {
             file = loadJsonDataFile(fileName);
@@ -141,18 +209,43 @@ public class StorageManager {
             e.printStackTrace();
         }
 
-        // if last file content equals FILE_MAX_USER_NUMBER
-        // free memory, increment fileNumberCount and create a new file
+        try {
+            List<User> usersList = new ArrayList<User>();
+            usersList = translateJsonToObject(usersList.getClass(), getStringFromFile(file));
 
+            if (usersList != null && usersList.size() > 0) {
+                usersList.add(user);
+            }
 
-        // Put default template to new file
+            if (usersList != null) {
+                writeJsonDataFile(
+                        translateObjectToJson(usersList, usersList.getClass()),
+                        fileName);
+            }
 
-        // Load file as Json Object
+        } catch (Exception e) {
+            //TODO Remove dummy statement !
+            if (e.getClass() == FileNotFoundException.class) {
+                e.printStackTrace();
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
 
-        // Add the incoming json object to file
+    private void UpdateProcess(InputStream is, DataUser existingUser) {
+        // Retrieve private file
+        String fileName = existingUser.getFileLocation();
 
-        // if no exception, commit index Entry
-        if (validateEntry) insert(newEntry);
+        // Change the targeted Json Object
+        changeExistingUserInJsonFile(
+                fileName,
+                translateJsonToObject(User.class, is)
+        );
+
+        // Update index entry
+        existingUser.setLastUpdate(new Date());
+        update(existingUser);
     }
 
     private void changeExistingUserInJsonFile(String fileName, User user) {
@@ -164,11 +257,64 @@ public class StorageManager {
             e.printStackTrace();
         }
 
+        try {
+            List<User> usersList = new ArrayList<User>();
+            usersList = translateJsonToObject(usersList.getClass(), getStringFromFile(file));
+
+            if (usersList != null && usersList.size() > 0) {
+                usersList = changeExistingUser(usersList, user);
+            }
+
+            if (usersList != null) {
+                writeJsonDataFile(
+                        translateObjectToJson(usersList, usersList.getClass()),
+                        fileName);
+            }
+
+        } catch (Exception e) {
+            //TODO Remove dummy statement !
+            if (e.getClass() == FileNotFoundException.class) {
+                e.printStackTrace();
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private List<User> changeExistingUser(List<User> usersList, User user) {
+        try {
+            int i;
+            for (i = 0; i < usersList.size(); i++) {
+                User u = usersList.get(i);
+                if (u.getUniqId().equals(user.getUniqId()))
+                    break;
+            }
+
+            if (i >= 0 && i < usersList.size())
+                usersList.remove(i);
+
+            usersList.add(user);
+
+            return usersList;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private <T> T translateJsonToObject(Class<T> classType, String input) {
+        return gson.fromJson(new StringReader(input), classType);
     }
 
     private <T> T translateJsonToObject(Class<T> classType, InputStream is) {
 
         return gson.fromJson(new InputStreamReader(is), classType);
+    }
+
+    private String translateObjectToJson(Object obj, Class classType) {
+        return gson.toJson(obj, classType);
     }
 
     private String searchInDataStream(InputStream is, String uniqId) {
@@ -212,36 +358,48 @@ public class StorageManager {
         return selectedFile;
     }
 
-    private void addDataToJsonFile(File fileJson) {
-
-        String strFileJson = null;
-        JSONObject jsonObj = null;
-
+    private void writeJsonDataFile(String fileContent, String fileName) {
         try {
-            strFileJson = getStringFromFile(fileJson.toString());
-            jsonObj = new JSONObject(strFileJson);
-
-        } catch (JSONException e) {
-            if (isContextLoaded) AlertHelper.showAlert(mContext, "Error", "JsonObject Parsing Error");
-        } catch (Exception e) {
+            FileOutputStream fos = mContext.openFileOutput(fileName, MODE_PRIVATE);
+            fos.write(fileContent.getBytes());
+            fos.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Gson gson = new Gson();
-        JsonParser jsonParser = new JsonParser();
-
-        // writeJsonFile(fileJson, jsonObj.toString());
-
     }
 
     private String getStringFromFile (String filePath) throws Exception {
 
         File fl = new File(filePath);
-        FileInputStream fin = new FileInputStream(fl);
+
+        return getStringFromFile(fl);
+    }
+
+    private String getStringFromFile(File file) throws Exception {
+
+        if (!file.exists()) throw new FileNotFoundException("File " + file.toString() + " not found");
+
+        FileInputStream fin = new FileInputStream(file);
         String res = convertStreamToString(fin);
         fin.close();
 
         return res;
+    }
+
+    private int countJsonElementInStream(FileInputStream fileInputStream) {
+
+        JsonReader reader = new JsonReader(new InputStreamReader(fileInputStream));
+        int count = 0;
+
+        try {
+            while (reader.hasNext()) {
+                if (reader.nextString().contentEquals(SEARCH_DELTA))
+                    count++;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 
     private String convertStreamToString(InputStream is) throws Exception {
@@ -257,53 +415,18 @@ public class StorageManager {
         return sb.toString();
     }
 
-    private void writeJsonFile(File file, String json)
-    {
-        BufferedWriter bufferedWriter = null;
+    private File createNewJsonFile(String fileName) {
         try {
-
-            if(!file.exists()){
-                FileOutputStream fos = mContext.openFileOutput(file.getName(), Context.MODE_PRIVATE);
-                fos.close();
-                file.createNewFile();
-            }
-
-            FileWriter fileWriter = new FileWriter(file);
-            bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(json);
-
-        } catch (IOException e) {
+            FileOutputStream fos = mContext.openFileOutput(fileName, MODE_PRIVATE);
+            fos.close();
+            return mContext.getFileStreamPath(fileName);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                if (bufferedWriter != null){
-                    bufferedWriter.close();
-                }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    public String searchDataFromJsonFile() {
-
-        try {
-            String user = readJsonStream(new FileInputStream(""));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "User";
-    }
 
-    private String readJsonStream(InputStream is) throws IOException {
-        JsonReader reader = new JsonReader(new InputStreamReader(is, "UTF-8"));
-
-        try {
-
-            return "User";
-        } finally {
-            reader.close();
-        }
+        return null;
     }
 
     public void createDataBase(Context context) throws StormException {
@@ -318,6 +441,13 @@ public class StorageManager {
         }
     }
 
+    public void closeDBManager() {
+        if (dbManager != null
+                && dbManager.isOpen()) {
+            dbManager.close();
+            dbManager = null;
+        }
+    }
 
     public void initiateDBManager(Context context, String dbName) {
         this.closeDBManager();
@@ -341,16 +471,6 @@ public class StorageManager {
         }
     }
 
-    public void closeDBManager() {
-        if (dbManager != null
-                && dbManager.isOpen()) {
-            dbManager.close();
-            dbManager = null;
-        }
-    }
-
-
-
     public void insert(DataUser user) {
         if (!this.dbManager.isOpen())
             throw new SQLiteException("DbManager has not been instanciated yet");
@@ -370,5 +490,16 @@ public class StorageManager {
             throw new SQLiteException("DbManager has not been instanciated yet");
 
         return Storm.newSelect(dbManager).query(DataUser.class, Selection.eq("uniqId", uniqId));
+    }
+
+    public void update(DataUser user) {
+        if (!this.dbManager.isOpen())
+            throw new SQLiteException("DbManager has not been instanciated yet");
+
+        try {
+            Storm.newUpdate(dbManager).update(user, Selection.eq("uniqId", user.getUniqId()));
+        } catch (StormException e) {
+            e.printStackTrace();
+        }
     }
 }
