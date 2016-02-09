@@ -4,35 +4,36 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
+    android:background="@color/iron"
     >
 
     <ImageView
         android:id="@+id/avatar"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        tools:background="#AAA"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:src="@drawable/profile_picture_unknown"
         />
 
     <TextView
         android:id="@+id/nom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
         android:layout_marginLeft="10dp"
         android:layout_toRightOf="@+id/avatar"
         android:layout_alignTop="@+id/avatar"
         android:textStyle="bold"
         tools:text="@string/nom"
+        android:textColor="@android:color/black"
         />
 
     <TextView
         android:id="@+id/prenom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/black"
         android:layout_alignLeft="@+id/nom"
         android:layout_below="@+id/nom"
         tools:text="@string/prenom"
+        android:textColor="@android:color/black"
         />
 
     <TextView
@@ -40,35 +41,28 @@
         android:layout_height="wrap_content"
         android:text="@string/adress"
         android:id="@+id/adresse"
-        android:layout_alignBottom="@+id/avatar"
-        android:layout_alignLeft="@+id/prenom"
-        android:layout_alignStart="@+id/prenom"
+        android:textColor="@android:color/black"
+        android:layout_below="@+id/avatar"
+        android:layout_alignLeft="@+id/avatar"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Relations :"
-        android:id="@+id/relation"
-        android:layout_below="@+id/avatar"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="40dp" />
 
     <TextView
         android:layout_width="wrap_content"
+        android:textColor="@android:color/black"
         android:layout_height="wrap_content"
-        android:text="Père :"
+        android:text="@string/pere"
         android:id="@+id/pere"
-        android:layout_below="@+id/relation"
+        android:layout_below="@+id/adresse"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Mère :"
+        android:textColor="@android:color/black"
+        android:text="@string/mere"
         android:id="@+id/mere"
         android:layout_below="@+id/pere"
         android:layout_alignParentLeft="true"
@@ -77,6 +71,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="@android:color/black"
         android:text="Groupe sanguin :"
         android:id="@+id/groupe_sanguin"
         android:layout_below="@+id/mere"

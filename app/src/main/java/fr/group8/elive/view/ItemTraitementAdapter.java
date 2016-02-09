@@ -10,13 +10,13 @@ import android.widget.TextView;
 import java.util.List;
 
 import fr.group8.elive.app.R;
-import fr.group8.elive.models.ItemTraitement;
+import fr.group8.elive.models.Patient;
 
 /**
  * Created by chriis on 03/02/2016.
  */
-public class ItemTraitementAdapter extends ArrayAdapter<ItemTraitement> {
-    public ItemTraitementAdapter(Context context, List<ItemTraitement> items){super(context,0,items);
+public class ItemTraitementAdapter extends ArrayAdapter<Patient.Traitement> {
+    public ItemTraitementAdapter(Context context, List<Patient.Traitement> items){super(context,0,items);
     }
 
     @Override
@@ -31,8 +31,8 @@ public class ItemTraitementAdapter extends ArrayAdapter<ItemTraitement> {
             convertView.setTag(viewHolder);
         }
 
-        ItemTraitement itemTraitement = getItem(position);
-        viewHolder.text.setText(itemTraitement.getsNomTraitement());
+        Patient.Traitement Traitement = getItem(position);
+        viewHolder.text.setText(Traitement.getsMedicament());
 
         return convertView;
 

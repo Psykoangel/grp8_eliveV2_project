@@ -5,49 +5,44 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import fr.group8.elive.exceptions.NfcException;
+import fr.group8.elive.models.Patient;
 import fr.group8.elive.utils.AlertHelper;
 import fr.group8.elive.utils.NfcWrapper;
 import fr.group8.elive.utils.StorageManager;
+import fr.group8.elive.view.ItemAlergieMaladieAdapter;
+import fr.group8.elive.view.ItemTraitementAdapter;
 import ru.noties.storm.exc.StormException;
 
 
-public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
-
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
-    private ViewPager mViewPager;
+public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // Defines the single acces to the Storage Manager object
     // Handles the SQLite and private files management
@@ -101,14 +96,22 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         super.onResume();
         NfcWrapper.Instance().activateForegroundIntentCatching(this);
     }
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
+    public  static Context context;
+    public static ImageView imageViewNFC ;
+    public static ImageView imageViewConnexion ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_medical_file);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        imageViewNFC = (ImageView) findViewById(R.id.imageviewnfc);
+        imageViewConnexion = (ImageView) findViewById(R.id.imageviewinternet);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -119,16 +122,18 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        context = this;
+        long lDelai = 4000;
+        long lPeriode = 10000;
+        Timer timer = new Timer();
+        MyTimer mytimer = new MyTimer();
+        timer.schedule(mytimer,lDelai,lPeriode);
 
         checkInternetStatus();
 
@@ -160,36 +165,8 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        super.onCreateOptionsMenu(menu);
-        menu.add("NFC").setIcon(R.drawable.ic_menu_gallery);
-
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.test) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
-
         if (id == R.id.nav_manage) {
 
         } else if (id == R.id.nav_share) {
@@ -213,7 +190,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private ListView mListView;
-
+        private Patient patient;
         public View rootView;
 
         public PlaceholderFragment() {
@@ -231,23 +208,86 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
             return fragment;
         }
 
+
+
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+            Patient hmatysiak = new Patient(
+                    new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK","Papa","MATYSIAK","Maman"),
+                    new ArrayList<Patient.Traitement>(){{
+                        add(new Patient.Traitement("Advil"));
+                        add(new Patient.Traitement("Doliprane 1000 mg"));
+                        add(new Patient.Traitement("Effelralgan"));
+                        add(new Patient.Traitement("Dafalgan"));
+                        add(new Patient.Traitement("Levothyrox"));
+                        add(new Patient.Traitement("Kardegic"));
+                        add(new Patient.Traitement("Tahor"));
+                        add(new Patient.Traitement("Atarax"));
+                        add(new Patient.Traitement("Forlax"));
+                        add(new Patient.Traitement("Daflon"));
+                        add(new Patient.Traitement("Hexaquine"));
+                        add(new Patient.Traitement("Spasfon"));
+                    }},
+                    new ArrayList<Patient.AlergieMaladie>(){{
+                        add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
+                        add(new Patient.AlergieMaladie("angine", new Date()));
+                        add(new Patient.AlergieMaladie("Ricola", new Date()));
+                        add(new Patient.AlergieMaladie("Brûlures", new Date()));
+                        add(new Patient.AlergieMaladie("Cellulite", new Date()));
+                        add(new Patient.AlergieMaladie("Aphtes", new Date()));
+                        add(new Patient.AlergieMaladie("Anxiété", new Date()));
+                        add(new Patient.AlergieMaladie("Conjonctivite", new Date()));
+                        add(new Patient.AlergieMaladie("Chiasse ! MotherFucker :(", new Date()));
+                    }}
+            );
+
+
 
 
             if(getArguments().getInt(ARG_SECTION_NUMBER)==1)
             {
                 rootView = inflater.inflate(R.layout.item_information, container, false);
+                TextView tvNom = (TextView) rootView.findViewById(R.id.nom);
+                TextView tvPrenom = (TextView) rootView.findViewById(R.id.prenom);
+                TextView tvAdresse = (TextView) rootView.findViewById(R.id.adresse);
+                TextView tvGrouppeSanguin = (TextView) rootView.findViewById(R.id.groupe_sanguin);
+                TextView tvMere = (TextView) rootView.findViewById(R.id.mere);
+                TextView tvPere = (TextView) rootView.findViewById(R.id.pere);
+
+                tvAdresse.setText(hmatysiak.getInformation().getsAdresse());
+                tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+" " +hmatysiak.getInformation().getsGrouppeSanguin());
+                tvNom.setText(hmatysiak.getInformation().getsNomPatient());
+                tvPrenom.setText(hmatysiak.getInformation().getsPrenomPatient());
+                tvPere.setText(getString(R.string.pere)+" " + hmatysiak.getInformation().getsNomPerePatient()+" "+hmatysiak.getInformation().getsPrenomPerePatient());
+                tvMere.setText(getString(R.string.mere) +" "+ hmatysiak.getInformation().getsNomMerePatient()+" "+hmatysiak.getInformation().getsPrenomMerePatient());
+                //tvPrenom.setText(getString(R.string.prenom)+patient.getInformation().getsPrenomPatient());
+                //tvNom.setText(getString(R.string.nom)+patient.getInformation().getsNomPatient());
+                //tvAdresse.setText(getString(R.string.adress)+patient.getInformation().getsAdresse());
+                //tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+patient.getInformation().getsGrouppeSanguin());
+
+
 
             }else if(getArguments().getInt(ARG_SECTION_NUMBER)==2)
             {
                 rootView = inflater.inflate(R.layout.frag_traitement, container, false);
+                mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
+                List<Patient.Traitement> traitements = hmatysiak.getListTraitement();
+                ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(),traitements);
+                if (mListView != null || adapter != null){
+                    mListView.setAdapter(adapter);
+                }
+
 
             }else if(getArguments().getInt(ARG_SECTION_NUMBER)==3)
             {
-                rootView = inflater.inflate(R.layout.item_alergie_maladie, container, false);
-
+                rootView = inflater.inflate(R.layout.frag_alergie_maladie, container, false);
+                mListView = (ListView) rootView.findViewById(R.id.listViewAlergieMaladie);
+                List<Patient.AlergieMaladie> alergieMaladies = hmatysiak.getListAlergieMaladie();
+                ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(),alergieMaladies);
+                if (mListView != null || adapter != null){
+                    mListView.setAdapter(adapter);
+                }
 
             }else{
                 rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
@@ -268,13 +308,11 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                         });
                 alertDialog.show();
             }
+
+
             return rootView;
         }
 
-        public void CreateListViewTraitement ()
-        {
-            mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
-        }
     }
 
     /**
@@ -311,6 +349,40 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                     return "Alergie et maladie";
             }
             return null;
+        }
+
+    }
+
+    class MyTimer extends TimerTask{
+
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    //code exécuté par l'UI thread
+
+                    //coed pour le nfc
+                    android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(context);
+                    if (!mNfcAdapter.isEnabled()) {
+                        imageViewNFC.setImageResource(R.drawable.nfcrouge);
+                    }else{
+
+                        imageViewNFC.setImageResource(R.drawable.nfcvert);
+                    }
+
+
+                    //code pour le connexion internet
+
+                    //if ( ... ) {
+                    //    imageViewConnexion.setImageResource(R.drawable.connexionrouge);
+                    //}else{
+
+                    //    imageViewConnexion.setImageResource(R.drawable.connexionvert);
+                    //}
+
+                }
+            });
+
         }
     }
 }
