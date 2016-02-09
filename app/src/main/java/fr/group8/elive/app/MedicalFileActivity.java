@@ -2,7 +2,12 @@ package fr.group8.elive.app;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.CountDownTimer;
+import android.provider.Settings;
 import android.support.annotation.UiThread;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -22,9 +27,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,9 +52,15 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
-    public  static Context context;
-    public static ImageView imageViewNFC ;
-    public static ImageView imageViewConnexion ;
+    public static Context context;
+    public static ImageView imageViewNFC;
+    public static ImageView imageViewConnexion;
+    private static DrawerLayout drawer;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,9 +71,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
         imageViewNFC = (ImageView) findViewById(R.id.imageviewnfc);
         imageViewConnexion = (ImageView) findViewById(R.id.imageviewinternet);
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
@@ -76,9 +91,11 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         long lPeriode = 10000;
         Timer timer = new Timer();
         MyTimer mytimer = new MyTimer();
-        timer.schedule(mytimer,lDelai,lPeriode);
+        timer.schedule(mytimer, lDelai, lPeriode);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
-
 
 
     @Override
@@ -94,16 +111,59 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                Intent intent = new Intent(Settings.ACTION_NFC_SETTINGS);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                startActivity(intent);
+            }
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "MedicalFile Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://fr.group8.elive.app/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "MedicalFile Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://fr.group8.elive.app/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 
     /**
@@ -135,13 +195,13 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         }
 
 
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            Patient hmatysiak = new Patient(
-                    new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK","Papa","MATYSIAK","Maman"),
-                    new ArrayList<Patient.Traitement>(){{
+
+            patient =  new Patient(
+                    new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK", "Papa", "MATYSIAK", "Maman"),
+                    new ArrayList<Patient.Traitement>() {{
                         add(new Patient.Traitement("Advil"));
                         add(new Patient.Traitement("Doliprane 1000 mg"));
                         add(new Patient.Traitement("Effelralgan"));
@@ -155,7 +215,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                         add(new Patient.Traitement("Hexaquine"));
                         add(new Patient.Traitement("Spasfon"));
                     }},
-                    new ArrayList<Patient.AlergieMaladie>(){{
+                    new ArrayList<Patient.AlergieMaladie>() {{
                         add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
                         add(new Patient.AlergieMaladie("angine", new Date()));
                         add(new Patient.AlergieMaladie("Ricola", new Date()));
@@ -169,10 +229,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
             );
 
 
-
-
-            if(getArguments().getInt(ARG_SECTION_NUMBER)==1)
-            {
+            if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
                 rootView = inflater.inflate(R.layout.item_information, container, false);
                 TextView tvNom = (TextView) rootView.findViewById(R.id.nom);
                 TextView tvPrenom = (TextView) rootView.findViewById(R.id.prenom);
@@ -180,47 +237,55 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 TextView tvGrouppeSanguin = (TextView) rootView.findViewById(R.id.groupe_sanguin);
                 TextView tvMere = (TextView) rootView.findViewById(R.id.mere);
                 TextView tvPere = (TextView) rootView.findViewById(R.id.pere);
+                TextView tvNomLabel = (TextView) rootView.findViewById(R.id.nomlabel);
+                TextView tvPrenomLabel = (TextView) rootView.findViewById(R.id.prenomlabel);
+                TextView tvAdresseLabel = (TextView) rootView.findViewById(R.id.adresse);
+                TextView tvGrouppeSanguinLabel = (TextView) rootView.findViewById(R.id.groupe_sanguinlabel);
+                TextView tvMereLabel = (TextView) rootView.findViewById(R.id.merelabel);
+                TextView tvPereLabel = (TextView) rootView.findViewById(R.id.perelabel);
 
-                tvAdresse.setText(hmatysiak.getInformation().getsAdresse());
-                tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+" " +hmatysiak.getInformation().getsGrouppeSanguin());
-                tvNom.setText(hmatysiak.getInformation().getsNomPatient());
-                tvPrenom.setText(hmatysiak.getInformation().getsPrenomPatient());
-                tvPere.setText(getString(R.string.pere)+" " + hmatysiak.getInformation().getsNomPerePatient()+" "+hmatysiak.getInformation().getsPrenomPerePatient());
-                tvMere.setText(getString(R.string.mere) +" "+ hmatysiak.getInformation().getsNomMerePatient()+" "+hmatysiak.getInformation().getsPrenomMerePatient());
-                //tvPrenom.setText(getString(R.string.prenom)+patient.getInformation().getsPrenomPatient());
-                //tvNom.setText(getString(R.string.nom)+patient.getInformation().getsNomPatient());
-                //tvAdresse.setText(getString(R.string.adress)+patient.getInformation().getsAdresse());
-                //tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+patient.getInformation().getsGrouppeSanguin());
+                tvAdresseLabel.setText(getString(R.string.adress));
+                tvGrouppeSanguinLabel.setText(getString(R.string.groupe_sanguin));
+                tvNomLabel.setText(getString(R.string.nom));
+                tvPrenomLabel.setText(getString(R.string.prenom));
+                tvMereLabel.setText(getString(R.string.pere));
+                tvPereLabel.setText(getString(R.string.mere));
+
+                tvPere.setText( patient.getInformation().getsNomPerePatient() + " " + patient.getInformation().getsPrenomPerePatient());
+                tvMere.setText(patient.getInformation().getsNomMerePatient() + " " + patient.getInformation().getsPrenomMerePatient());
+
+                tvPrenom.setText(patient.getInformation().getsPrenomPatient());
+                tvNom.setText(patient.getInformation().getsNomPatient());
+                tvAdresse.setText(patient.getInformation().getsAdresse());
+                tvGrouppeSanguin.setText(patient.getInformation().getsGrouppeSanguin());
 
 
 
-            }else if(getArguments().getInt(ARG_SECTION_NUMBER)==2)
-            {
+            } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
                 rootView = inflater.inflate(R.layout.frag_traitement, container, false);
                 mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
-                List<Patient.Traitement> traitements = hmatysiak.getListTraitement();
-                ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(),traitements);
-                if (mListView != null || adapter != null){
+                List<Patient.Traitement> traitements = patient.getListTraitement();
+                ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(), traitements);
+                if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
                 }
 
 
-            }else if(getArguments().getInt(ARG_SECTION_NUMBER)==3)
-            {
+            } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
                 rootView = inflater.inflate(R.layout.frag_alergie_maladie, container, false);
                 mListView = (ListView) rootView.findViewById(R.id.listViewAlergieMaladie);
-                List<Patient.AlergieMaladie> alergieMaladies = hmatysiak.getListAlergieMaladie();
-                ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(),alergieMaladies);
-                if (mListView != null || adapter != null){
+                List<Patient.AlergieMaladie> alergieMaladies = patient.getListAlergieMaladie();
+                ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(), alergieMaladies);
+                if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
                 }
 
-            }else{
+            } else {
                 rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
 
             }
 
-            android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(rootView.getContext());
+            NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(rootView.getContext());
 
             if (mNfcAdapter == null) {
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
@@ -278,7 +343,8 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         }
 
     }
-    class MyTimer extends TimerTask{
+
+    class MyTimer extends TimerTask {
 
         public void run() {
             runOnUiThread(new Runnable() {
@@ -287,10 +353,10 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                     //code exécuté par l'UI thread
 
                     //coed pour le nfc
-                    android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(context);
+                    NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
                     if (!mNfcAdapter.isEnabled()) {
                         imageViewNFC.setImageResource(R.drawable.nfcrouge);
-                    }else{
+                    } else {
 
                         imageViewNFC.setImageResource(R.drawable.nfcvert);
                     }

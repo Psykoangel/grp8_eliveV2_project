@@ -29,4 +29,5 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.nispok:slidingtabs:1.0.0'
     compile 'ru.noties:storm:1.0.3'
+    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }
