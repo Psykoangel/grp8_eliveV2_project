@@ -105,6 +105,11 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
     }
 
+    public void initPatient(Patient pPatient){
+        patient = pPatient;
+        PlaceholderFragment.newInstance(1);
+    }
+
 
     @Override
     public void onBackPressed() {
@@ -206,10 +211,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         }
 
 
-        public void initPatient(Patient pPatient){
-            patient = pPatient;
-            newInstance(1);
-        }
+
 
 
 
