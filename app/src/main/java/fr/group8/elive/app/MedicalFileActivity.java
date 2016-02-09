@@ -6,9 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.provider.Settings;
-import android.support.annotation.UiThread;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.GravityCompat;
@@ -23,12 +21,9 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,7 +33,6 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -56,6 +50,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     public static ImageView imageViewNFC;
     public static ImageView imageViewConnexion;
     private static DrawerLayout drawer;
+    public static Patient patient;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -65,6 +60,15 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        patient =  new Patient(
+                new Patient.Information(" ", " ", " ", " ", " ", " ", " ", " "),
+                new ArrayList<Patient.Traitement>() {{
+                }},
+                new ArrayList<Patient.AlergieMaladie>() {{
+                }}
+        );
+
         setContentView(R.layout.activity_medical_file);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -95,6 +99,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
     }
 
 
@@ -176,7 +181,6 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private ListView mListView;
-        private Patient patient;
         public View rootView;
 
         public PlaceholderFragment() {
@@ -187,46 +191,30 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          * number.
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
+
+
+
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+
             fragment.setArguments(args);
             return fragment;
         }
+
+
+        public void initPatient(Patient pPatient){
+            patient = pPatient;
+            newInstance(1);
+        }
+
 
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
-            patient =  new Patient(
-                    new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK", "Papa", "MATYSIAK", "Maman"),
-                    new ArrayList<Patient.Traitement>() {{
-                        add(new Patient.Traitement("Advil"));
-                        add(new Patient.Traitement("Doliprane 1000 mg"));
-                        add(new Patient.Traitement("Effelralgan"));
-                        add(new Patient.Traitement("Dafalgan"));
-                        add(new Patient.Traitement("Levothyrox"));
-                        add(new Patient.Traitement("Kardegic"));
-                        add(new Patient.Traitement("Tahor"));
-                        add(new Patient.Traitement("Atarax"));
-                        add(new Patient.Traitement("Forlax"));
-                        add(new Patient.Traitement("Daflon"));
-                        add(new Patient.Traitement("Hexaquine"));
-                        add(new Patient.Traitement("Spasfon"));
-                    }},
-                    new ArrayList<Patient.AlergieMaladie>() {{
-                        add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
-                        add(new Patient.AlergieMaladie("angine", new Date()));
-                        add(new Patient.AlergieMaladie("Ricola", new Date()));
-                        add(new Patient.AlergieMaladie("Brûlures", new Date()));
-                        add(new Patient.AlergieMaladie("Cellulite", new Date()));
-                        add(new Patient.AlergieMaladie("Aphtes", new Date()));
-                        add(new Patient.AlergieMaladie("Anxiété", new Date()));
-                        add(new Patient.AlergieMaladie("Conjonctivite", new Date()));
-                        add(new Patient.AlergieMaladie("Chiasse ! MotherFucker :(", new Date()));
-                    }}
-            );
+
 
 
             if (getArguments().getInt(ARG_SECTION_NUMBER) == 1) {
