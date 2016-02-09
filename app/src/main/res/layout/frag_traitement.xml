@@ -7,8 +7,9 @@
         android:id="@+id/listViewTraitement"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:divider="#e5e5e5"
         android:dividerHeight="2dp">
     </ListView>
+
+
 
 </LinearLayout>

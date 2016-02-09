@@ -33,6 +33,7 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -64,8 +65,10 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         patient =  new Patient(
                 new Patient.Information(" ", " ", " ", " ", " ", " ", " ", " "),
                 new ArrayList<Patient.Traitement>() {{
+                    add(new Patient.Traitement("Aucune donnée disponible..."));
                 }},
                 new ArrayList<Patient.AlergieMaladie>() {{
+                    add(new Patient.AlergieMaladie("Aucune donnée disponible...", new Date()));
                 }}
         );
 
@@ -254,19 +257,22 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
                 List<Patient.Traitement> traitements = patient.getListTraitement();
                 ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(), traitements);
+
                 if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
                 }
-
 
             } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
                 rootView = inflater.inflate(R.layout.frag_alergie_maladie, container, false);
                 mListView = (ListView) rootView.findViewById(R.id.listViewAlergieMaladie);
                 List<Patient.AlergieMaladie> alergieMaladies = patient.getListAlergieMaladie();
                 ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(), alergieMaladies);
+
                 if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
                 }
+
+
 
             } else {
                 rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
