@@ -22,7 +22,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import fr.group8.elive.app.R;
+import fr.group8.elive.models.BloodGroup;
+import fr.group8.elive.models.CMAItem;
 import fr.group8.elive.models.DataUser;
+import fr.group8.elive.models.RelationType;
 import fr.group8.elive.models.User;
 import ru.noties.storm.DatabaseManager;
 import ru.noties.storm.Storm;
@@ -67,6 +71,11 @@ public class StorageManager {
     private Context mContext;
     private DatabaseManager dbManager;
     private int fileNumberCount;
+    private Class<?> [] dbTypes = {
+            DataUser.class,
+            BloodGroup.class,
+            RelationType.class
+    };
 
     private boolean isDbReady;
 
@@ -286,7 +295,7 @@ public class StorageManager {
             int i;
             for (i = 0; i < usersList.size(); i++) {
                 User u = usersList.get(i);
-                if (u.getUniqId().equals(user.getUniqId()))
+                if (u.getUserUniqId().equals(user.getUserUniqId()))
                     break;
             }
 
@@ -465,22 +474,73 @@ public class StorageManager {
     public void initiateDBManager(Context context, String dbName) {
         this.closeDBManager();
 
-        Class<?> [] types = {
-                DataUser.class
-        };
-
         dbManager = new DatabaseManager(
                 context,
                 dbName,
                 DB_VERSION,
-                types
+                dbTypes
         );
 
         try {
             dbManager.open();
+            initiateDbStaticData();
         } catch (SQLiteException e) {
             dbManager = null;
             e.printStackTrace();
+        }
+    }
+
+    private void initiateDbStaticData() {
+        if (!(dbManager.count(BloodGroup.class) > 0)) {
+            dbManager.getDataBase().execSQL(
+                mContext.getString(R.string.db_sqlinsert_bloodgroup)
+            );
+        }
+        if (!(dbManager.count(RelationType.class) > 0)) {
+            dbManager.getDataBase().execSQL(
+                mContext.getString(R.string.db_sqlinsert_relationtype)
+            );
+        }
+        if (!(dbManager.count(CMAItem.class) > 0)) {
+            InputStream stream = mContext.getResources().openRawResource(R.raw.db_sqlinsert_cma);
+            dbManager.getDataBase().execSQL(
+                inputStreamToString(stream)
+            );
+        }
+    }
+
+    private String inputStreamToString(InputStream stream) {
+
+        if(stream != null)
+        {
+            BufferedReader br = null;
+            StringBuilder sb = new StringBuilder();
+
+            String line;
+            try {
+
+                br = new BufferedReader(new InputStreamReader(stream));
+                while ((line = br.readLine()) != null) {
+                    sb.append(line);
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            return sb.toString();
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -503,6 +563,19 @@ public class StorageManager {
             throw new SQLiteException("DbManager has not been instanciated yet");
 
         return Storm.newSelect(dbManager).query(DataUser.class, Selection.eq("uniqId", uniqId));
+    }
+
+    public String selectBloodGroup(int id) {
+        if (!this.dbManager.isOpen())
+            throw new SQLiteException("DbManager has not been instanciated yet");
+
+        BloodGroup bloodGroup = Storm.newSelect(dbManager).query(BloodGroup.class, Selection.eq("bloodgroup_id", id));
+
+        if (bloodGroup.isValide()) {
+            return bloodGroup.getName() + bloodGroup.getSign();
+        } else {
+            return null;
+        }
     }
 
     public void update(DataUser user) {

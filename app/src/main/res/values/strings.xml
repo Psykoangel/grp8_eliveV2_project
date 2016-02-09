@@ -34,4 +34,6 @@
     <string name="pere">Père : </string>
     <string name="mere">Mère : </string>
     <string name="groupe_sanguin">Groupe sanguin : </string>
+    <string name="db_sqlinsert_bloodgroup">INSERT INTO `bloodgroup` (`bloodgroup_name`, `bloodgroup_sign`) VALUES\n(\'O\', \'+\'),\n(\'O\', \'-\'),\n(\'A\', \'+\'),\n(\'A\', \'-\'),\n(\'AB\', \'+\'),\n(\'AB\', \'-\'),\n(\'B\', \'+\'),\n(\'B\', \'-\');</string>
+    <string name="db_sqlinsert_relationtype">INSERT INTO `relationtype` (`relationtype_name`) VALUES\n(\'Père\'),\n(\'Mère\'),\n(\'Epoux\'),\n(\'Epouse\'),\n(\'Fils\'),\n(\'Fille\');</string>
 </resources>

@@ -26,6 +26,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,9 +35,12 @@ import java.util.TimerTask;
 
 import fr.group8.elive.exceptions.NfcException;
 import fr.group8.elive.models.Patient;
+import fr.group8.elive.models.User;
 import fr.group8.elive.utils.AlertHelper;
+import fr.group8.elive.utils.JsonHelper;
 import fr.group8.elive.utils.NfcWrapper;
 import fr.group8.elive.utils.StorageManager;
+import fr.group8.elive.utils.WebService;
 import fr.group8.elive.view.ItemAlergieMaladieAdapter;
 import fr.group8.elive.view.ItemTraitementAdapter;
 import ru.noties.storm.exc.StormException;
@@ -49,6 +53,12 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     private StorageManager stManager;
     // Defines the Internet Access Connection Status as a boolean value
     private boolean isConnected;
+
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
+    public static Context context;
+    public static ImageView imageViewNFC ;
+    public static ImageView imageViewConnexion ;
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -68,12 +78,48 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
         if (userId != null && !userId.isEmpty())
         {
+            Patient p = null;
             if (isConnected) {
+                WebService ws = new WebService();
+                InputStream is = ws.getUserInfos(userId);
 
+                // ** TODO Run this on another Thread
+                try {
+                    stManager.storeJsonData(is);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                // ** TODO !!!
+
+                User u = JsonHelper.Instance().translateJsonToObject(User.class, is);
+                p = new Patient(u);
             } else {
+                p = searchLocalData(userId);
+                if (p == null)
+                    AlertHelper.showAlert(this, "ERROR", "No patient found !");
+            }
 
+            if (p != null) {
+                // Display function to display Patient Info
+                // TODO Here /!\
+                // Display(p);
+            } else {
+                AlertHelper.showAlert(this, "ERROR", "No user found locally either remotely.");
             }
         }
+    }
+
+    private Patient searchLocalData(String userId) {
+
+        try {
+            User u = stManager.searchUser(userId);
+            Patient p = new Patient(u);
+            return p;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
     private void checkInternetStatus() {
@@ -96,11 +142,6 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         super.onResume();
         NfcWrapper.Instance().activateForegroundIntentCatching(this);
     }
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
-    public  static Context context;
-    public static ImageView imageViewNFC ;
-    public static ImageView imageViewConnexion ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,10 +153,15 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         imageViewNFC = (ImageView) findViewById(R.id.imageviewnfc);
         imageViewConnexion = (ImageView) findViewById(R.id.imageviewinternet);
 
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this,
+                drawer,
+                toolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close
+        );
+
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -129,11 +175,10 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
         context = this;
-        long lDelai = 4000;
-        long lPeriode = 10000;
+
         Timer timer = new Timer();
         MyTimer mytimer = new MyTimer();
-        timer.schedule(mytimer,lDelai,lPeriode);
+        timer.schedule(mytimer, 0, 1000 * 60 * 2);
 
         checkInternetStatus();
 
@@ -177,6 +222,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
         return true;
     }
 
@@ -213,33 +259,34 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
             Patient hmatysiak = new Patient(
-                    new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK","Papa","MATYSIAK","Maman"),
-                    new ArrayList<Patient.Traitement>(){{
-                        add(new Patient.Traitement("Advil"));
-                        add(new Patient.Traitement("Doliprane 1000 mg"));
-                        add(new Patient.Traitement("Effelralgan"));
-                        add(new Patient.Traitement("Dafalgan"));
-                        add(new Patient.Traitement("Levothyrox"));
-                        add(new Patient.Traitement("Kardegic"));
-                        add(new Patient.Traitement("Tahor"));
-                        add(new Patient.Traitement("Atarax"));
-                        add(new Patient.Traitement("Forlax"));
-                        add(new Patient.Traitement("Daflon"));
-                        add(new Patient.Traitement("Hexaquine"));
-                        add(new Patient.Traitement("Spasfon"));
-                    }},
-                    new ArrayList<Patient.AlergieMaladie>(){{
-                        add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
-                        add(new Patient.AlergieMaladie("angine", new Date()));
-                        add(new Patient.AlergieMaladie("Ricola", new Date()));
-                        add(new Patient.AlergieMaladie("Brûlures", new Date()));
-                        add(new Patient.AlergieMaladie("Cellulite", new Date()));
-                        add(new Patient.AlergieMaladie("Aphtes", new Date()));
-                        add(new Patient.AlergieMaladie("Anxiété", new Date()));
-                        add(new Patient.AlergieMaladie("Conjonctivite", new Date()));
-                        add(new Patient.AlergieMaladie("Chiasse ! MotherFucker :(", new Date()));
-                    }}
+                new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK","Papa","MATYSIAK","Maman"),
+                new ArrayList<Patient.Traitement>(){{
+                    add(new Patient.Traitement("Advil"));
+                    add(new Patient.Traitement("Doliprane 1000 mg"));
+                    add(new Patient.Traitement("Effelralgan"));
+                    add(new Patient.Traitement("Dafalgan"));
+                    add(new Patient.Traitement("Levothyrox"));
+                    add(new Patient.Traitement("Kardegic"));
+                    add(new Patient.Traitement("Tahor"));
+                    add(new Patient.Traitement("Atarax"));
+                    add(new Patient.Traitement("Forlax"));
+                    add(new Patient.Traitement("Daflon"));
+                    add(new Patient.Traitement("Hexaquine"));
+                    add(new Patient.Traitement("Spasfon"));
+                }},
+                new ArrayList<Patient.AlergieMaladie>(){{
+                    add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
+                    add(new Patient.AlergieMaladie("angine", new Date()));
+                    add(new Patient.AlergieMaladie("Ricola", new Date()));
+                    add(new Patient.AlergieMaladie("Brûlures", new Date()));
+                    add(new Patient.AlergieMaladie("Cellulite", new Date()));
+                    add(new Patient.AlergieMaladie("Aphtes", new Date()));
+                    add(new Patient.AlergieMaladie("Anxiété", new Date()));
+                    add(new Patient.AlergieMaladie("Conjonctivite", new Date()));
+                    add(new Patient.AlergieMaladie("Chiasse ! MotherFucker :(", new Date()));
+                }}
             );
 
 
@@ -363,22 +410,16 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
                     //coed pour le nfc
                     android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(context);
-                    if (!mNfcAdapter.isEnabled()) {
-                        imageViewNFC.setImageResource(R.drawable.nfcrouge);
-                    }else{
 
-                        imageViewNFC.setImageResource(R.drawable.nfcvert);
-                    }
+                    if (!mNfcAdapter.isEnabled()) imageViewNFC.setImageResource(R.drawable.nfcrouge);
+                    else imageViewNFC.setImageResource(R.drawable.nfcvert);
 
 
                     //code pour le connexion internet
+                    checkInternetStatus();
 
-                    //if ( ... ) {
-                    //    imageViewConnexion.setImageResource(R.drawable.connexionrouge);
-                    //}else{
-
-                    //    imageViewConnexion.setImageResource(R.drawable.connexionvert);
-                    //}
+                    if (!isConnected) imageViewConnexion.setImageResource(R.drawable.connexionrouge);
+                    else imageViewConnexion.setImageResource(R.drawable.connexionvert);
 
                 }
             });

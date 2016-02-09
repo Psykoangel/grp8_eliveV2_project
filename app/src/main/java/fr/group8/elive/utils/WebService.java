@@ -58,11 +58,13 @@ public class WebService {
         return null;
     }
 
-    public InputStream getUserInfos(int patientId) {
+    public InputStream getUserInfos(String patientId) {
 
         try {
+            URL url = new URL(this.getServerUrl() + APP_HIERARCHIY + "/" + patientId);
+
             // Sending Request
-            InputStream inputStream = sendRequest(new URL(this.getServerUrl()));
+            InputStream inputStream = sendRequest(url);
 
             // Check InputStream
             if(inputStream != null) {

@@ -3,11 +3,13 @@ package fr.group8.elive.models;
 import java.util.Date;
 import java.util.List;
 
+import fr.group8.elive.utils.StorageManager;
+
 /**
  * Created by chriis on 03/02/2016.
  */
 public class Patient {
-    private Integer id;
+    private String uniqId;
     private Information information;
     private List<Traitement> listTraitement;
     private List<AlergieMaladie> listAlergieMaladie;
@@ -16,19 +18,33 @@ public class Patient {
     public Patient(){
     }
 
+    public Patient(User user) {
+        this.setId(user.getUserUniqId());
+        /*Information info = new Information(
+                user.getPersonalData().getPersonaldataUsername(),
+                user.getPersonalData().getPersonaldataUserfirstname(),
+                user.getPersonalData().getPersonaldataAddress(),
+                StorageManager.Instance().selectBloodGroup(user.getPersonalData().getBloodgroupId()),
+                null,
+                null,
+                null,
+                null
+        );*/
+    }
+
     public Patient(Information information, List<Traitement> listTraitement, List<AlergieMaladie> listAlergieMaladie){
-        this.id = 0;
+        this.uniqId = null;
         this.listTraitement = listTraitement;
         this.information = information;
         this.listAlergieMaladie = listAlergieMaladie;
     }
 
-    public Integer getId(){
-        return id;
+    public String getId(){
+        return uniqId;
     }
 
-    public void setId(Integer id){
-        this.id = id;
+    public void setId(String id){
+        this.uniqId = id;
     }
 
     public Information getInformation() {
