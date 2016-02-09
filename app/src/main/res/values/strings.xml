@@ -31,7 +31,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="title_activity_medical_file">MedicalFileActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
-    <string name="pere">Père : </string>
-    <string name="mere">Mère : </string>
+    <string name="Tel">Téléphone : </string>
+    <string name="Id">ID : </string>
     <string name="groupe_sanguin">Groupe sanguin : </string>
 </resources>

@@ -84,19 +84,19 @@
         android:textColor="@android:color/black"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:hint="@string/pere"
-        android:id="@+id/perelabel"
+        android:hint="@string/Tel"
+        android:id="@+id/tellabel"
         android:layout_marginTop="20dp"
-        android:layout_below="@+id/mere"
+        android:layout_below="@+id/adresse"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
     <TextView
         android:layout_width="wrap_content"
         android:textColor="@android:color/black"
         android:layout_height="wrap_content"
-        android:hint="@string/pere"
-        android:id="@+id/pere"
-        android:layout_below="@+id/perelabel"
+        android:hint="@string/Tel"
+        android:id="@+id/tel"
+        android:layout_below="@+id/tellabel"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -105,9 +105,9 @@
         android:layout_height="wrap_content"
         android:textColor="@android:color/black"
         android:textStyle="bold"
-        android:hint="@string/mere"
-        android:id="@+id/merelabel"
-        android:layout_below="@+id/adresse"
+        android:hint="@string/Id"
+        android:id="@+id/idlabel"
+        android:layout_below="@+id/tel"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="19dp" />
@@ -115,9 +115,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/black"
-        android:hint="@string/mere"
-        android:id="@+id/mere"
-        android:layout_below="@+id/merelabel"
+        android:hint="@string/Id"
+        android:id="@+id/id"
+        android:layout_below="@+id/idlabel"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -128,7 +128,7 @@
         android:hint="Groupe sanguin :"
         android:id="@+id/groupe_sanguinlabel"
         android:textStyle="bold"
-        android:layout_below="@+id/pere"
+        android:layout_below="@+id/id"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_marginTop="37dp" />

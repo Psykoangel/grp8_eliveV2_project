@@ -40,7 +40,7 @@ import java.util.TimerTask;
 
 import fr.group8.elive.models.Patient;
 import fr.group8.elive.view.ItemAlergieMaladieAdapter;
-import fr.group8.elive.view.ItemTraitementAdapter;
+import fr.group8.elive.view.ItemRelationAdapter;
 
 
 public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -63,9 +63,9 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         super.onCreate(savedInstanceState);
 
         patient =  new Patient(
-                new Patient.Information(" ", " ", " ", " ", " ", " ", " ", " "),
-                new ArrayList<Patient.Traitement>() {{
-                    add(new Patient.Traitement("Aucune donnée disponible..."));
+                new Patient.Information(" ", " ", " ", " ", " "," "),
+                new ArrayList<Patient.Relation>() {{
+                    add(new Patient.Relation("Aucune donnée disponible..."," "," "));
                 }},
                 new ArrayList<Patient.AlergieMaladie>() {{
                     add(new Patient.AlergieMaladie("Aucune donnée disponible...", new Date()));
@@ -226,24 +226,24 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 TextView tvPrenom = (TextView) rootView.findViewById(R.id.prenom);
                 TextView tvAdresse = (TextView) rootView.findViewById(R.id.adresse);
                 TextView tvGrouppeSanguin = (TextView) rootView.findViewById(R.id.groupe_sanguin);
-                TextView tvMere = (TextView) rootView.findViewById(R.id.mere);
-                TextView tvPere = (TextView) rootView.findViewById(R.id.pere);
+                TextView tvTel = (TextView) rootView.findViewById(R.id.tel);
+                TextView tvId = (TextView) rootView.findViewById(R.id.id);
                 TextView tvNomLabel = (TextView) rootView.findViewById(R.id.nomlabel);
                 TextView tvPrenomLabel = (TextView) rootView.findViewById(R.id.prenomlabel);
                 TextView tvAdresseLabel = (TextView) rootView.findViewById(R.id.adresse);
                 TextView tvGrouppeSanguinLabel = (TextView) rootView.findViewById(R.id.groupe_sanguinlabel);
-                TextView tvMereLabel = (TextView) rootView.findViewById(R.id.merelabel);
-                TextView tvPereLabel = (TextView) rootView.findViewById(R.id.perelabel);
+                TextView tvIdLabel = (TextView) rootView.findViewById(R.id.idlabel);
+                TextView tvTelLabel = (TextView) rootView.findViewById(R.id.tellabel);
 
                 tvAdresseLabel.setText(getString(R.string.adress));
                 tvGrouppeSanguinLabel.setText(getString(R.string.groupe_sanguin));
                 tvNomLabel.setText(getString(R.string.nom));
                 tvPrenomLabel.setText(getString(R.string.prenom));
-                tvMereLabel.setText(getString(R.string.pere));
-                tvPereLabel.setText(getString(R.string.mere));
+                tvIdLabel.setText(getString(R.string.Tel));
+                tvTelLabel.setText(getString(R.string.Id));
 
-                tvPere.setText( patient.getInformation().getsNomPerePatient() + " " + patient.getInformation().getsPrenomPerePatient());
-                tvMere.setText(patient.getInformation().getsNomMerePatient() + " " + patient.getInformation().getsPrenomMerePatient());
+                tvId.setText( patient.getInformation().getsId());
+                tvTel.setText(patient.getInformation().getsTel());
 
                 tvPrenom.setText(patient.getInformation().getsPrenomPatient());
                 tvNom.setText(patient.getInformation().getsNomPatient());
@@ -253,10 +253,10 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
 
             } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
-                rootView = inflater.inflate(R.layout.frag_traitement, container, false);
-                mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
-                List<Patient.Traitement> traitements = patient.getListTraitement();
-                ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(), traitements);
+                rootView = inflater.inflate(R.layout.frag_relation, container, false);
+                mListView = (ListView) rootView.findViewById(R.id.listViewRelation);
+                List<Patient.Relation> relations = patient.getListRelation();
+                ItemRelationAdapter adapter = new ItemRelationAdapter(getContext(), relations);
 
                 if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
@@ -329,7 +329,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 case 0:
                     return "Information";
                 case 1:
-                    return "Traitement";
+                    return "Relation";
                 case 2:
                     return "Alergie et maladie";
             }
