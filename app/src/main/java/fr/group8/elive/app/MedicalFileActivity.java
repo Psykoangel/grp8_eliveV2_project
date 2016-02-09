@@ -3,9 +3,15 @@ package fr.group8.elive.app;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+
+import android.nfc.NfcAdapter;
+import android.os.Build;
+import android.provider.Settings;
+
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -27,6 +33,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.InputStream;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -42,8 +49,11 @@ import fr.group8.elive.utils.NfcWrapper;
 import fr.group8.elive.utils.StorageManager;
 import fr.group8.elive.utils.WebService;
 import fr.group8.elive.view.ItemAlergieMaladieAdapter;
-import fr.group8.elive.view.ItemTraitementAdapter;
+
 import ru.noties.storm.exc.StormException;
+
+import fr.group8.elive.view.ItemRelationAdapter;
+
 
 
 public class MedicalFileActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -57,8 +67,10 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     public static Context context;
-    public static ImageView imageViewNFC ;
-    public static ImageView imageViewConnexion ;
+    public static ImageView imageViewNFC;
+    public static ImageView imageViewConnexion;
+    private static DrawerLayout drawer;
+    public static Patient patient;
 
     @Override
     protected void onNewIntent(Intent intent) {
@@ -146,6 +158,17 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        patient =  new Patient(
+                new Patient.Information(" ", " ", " ", " ", " "," "),
+                new ArrayList<Patient.Relation>() {{
+                    add(new Patient.Relation("Aucune donnée disponible..."," "," "));
+                }},
+                new ArrayList<Patient.AlergieMaladie>() {{
+                    add(new Patient.AlergieMaladie("Aucune donnée disponible...", new Date()));
+                }}
+        );
+
         setContentView(R.layout.activity_medical_file);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -153,7 +176,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         imageViewNFC = (ImageView) findViewById(R.id.imageviewnfc);
         imageViewConnexion = (ImageView) findViewById(R.id.imageviewinternet);
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,
                 drawer,
@@ -213,10 +236,13 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                Intent intent = new Intent(Settings.ACTION_NFC_SETTINGS);
+                startActivity(intent);
+            } else {
+                Intent intent = new Intent(Settings.ACTION_WIRELESS_SETTINGS);
+                startActivity(intent);
+            }
 
         }
 
@@ -224,6 +250,16 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         drawer.closeDrawer(GravityCompat.START);
 
         return true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
     }
 
     /**
@@ -236,7 +272,6 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          */
         private static final String ARG_SECTION_NUMBER = "section_number";
         private ListView mListView;
-        private Patient patient;
         public View rootView;
 
         public PlaceholderFragment() {
@@ -247,11 +282,21 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
          * number.
          */
         public static PlaceholderFragment newInstance(int sectionNumber) {
+
+
+
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
             args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+
             fragment.setArguments(args);
             return fragment;
+        }
+
+
+        public void initPatient(Patient pPatient){
+            patient = pPatient;
+            newInstance(1);
         }
 
 
@@ -261,21 +306,8 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                                  Bundle savedInstanceState) {
 
             Patient hmatysiak = new Patient(
-                new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "MATYSIAK","Papa","MATYSIAK","Maman"),
-                new ArrayList<Patient.Traitement>(){{
-                    add(new Patient.Traitement("Advil"));
-                    add(new Patient.Traitement("Doliprane 1000 mg"));
-                    add(new Patient.Traitement("Effelralgan"));
-                    add(new Patient.Traitement("Dafalgan"));
-                    add(new Patient.Traitement("Levothyrox"));
-                    add(new Patient.Traitement("Kardegic"));
-                    add(new Patient.Traitement("Tahor"));
-                    add(new Patient.Traitement("Atarax"));
-                    add(new Patient.Traitement("Forlax"));
-                    add(new Patient.Traitement("Daflon"));
-                    add(new Patient.Traitement("Hexaquine"));
-                    add(new Patient.Traitement("Spasfon"));
-                }},
+                new Patient.Information("MATYSIAK", "Hervé", "27 Porte de Buhl\n 68530 BUHL\n France", "a+", "", ""),
+                new ArrayList<Patient.Relation>(),
                 new ArrayList<Patient.AlergieMaladie>(){{
                     add(new Patient.AlergieMaladie("Glucide pondere0", new Date()));
                     add(new Patient.AlergieMaladie("angine", new Date()));
@@ -299,49 +331,60 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 TextView tvPrenom = (TextView) rootView.findViewById(R.id.prenom);
                 TextView tvAdresse = (TextView) rootView.findViewById(R.id.adresse);
                 TextView tvGrouppeSanguin = (TextView) rootView.findViewById(R.id.groupe_sanguin);
-                TextView tvMere = (TextView) rootView.findViewById(R.id.mere);
-                TextView tvPere = (TextView) rootView.findViewById(R.id.pere);
+                TextView tvTel = (TextView) rootView.findViewById(R.id.tel);
+                TextView tvId = (TextView) rootView.findViewById(R.id.id);
+                TextView tvNomLabel = (TextView) rootView.findViewById(R.id.nomlabel);
+                TextView tvPrenomLabel = (TextView) rootView.findViewById(R.id.prenomlabel);
+                TextView tvAdresseLabel = (TextView) rootView.findViewById(R.id.adresse);
+                TextView tvGrouppeSanguinLabel = (TextView) rootView.findViewById(R.id.groupe_sanguinlabel);
+                TextView tvIdLabel = (TextView) rootView.findViewById(R.id.idlabel);
+                TextView tvTelLabel = (TextView) rootView.findViewById(R.id.tellabel);
 
-                tvAdresse.setText(hmatysiak.getInformation().getsAdresse());
-                tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+" " +hmatysiak.getInformation().getsGrouppeSanguin());
-                tvNom.setText(hmatysiak.getInformation().getsNomPatient());
-                tvPrenom.setText(hmatysiak.getInformation().getsPrenomPatient());
-                tvPere.setText(getString(R.string.pere)+" " + hmatysiak.getInformation().getsNomPerePatient()+" "+hmatysiak.getInformation().getsPrenomPerePatient());
-                tvMere.setText(getString(R.string.mere) +" "+ hmatysiak.getInformation().getsNomMerePatient()+" "+hmatysiak.getInformation().getsPrenomMerePatient());
-                //tvPrenom.setText(getString(R.string.prenom)+patient.getInformation().getsPrenomPatient());
-                //tvNom.setText(getString(R.string.nom)+patient.getInformation().getsNomPatient());
-                //tvAdresse.setText(getString(R.string.adress)+patient.getInformation().getsAdresse());
-                //tvGrouppeSanguin.setText(getString(R.string.groupe_sanguin)+patient.getInformation().getsGrouppeSanguin());
+                tvAdresseLabel.setText(getString(R.string.adress));
+                tvGrouppeSanguinLabel.setText(getString(R.string.groupe_sanguin));
+                tvNomLabel.setText(getString(R.string.nom));
+                tvPrenomLabel.setText(getString(R.string.prenom));
+                tvIdLabel.setText(getString(R.string.Tel));
+                tvTelLabel.setText(getString(R.string.Id));
+
+                tvId.setText( patient.getInformation().getsId());
+                tvTel.setText(patient.getInformation().getsTel());
+
+                tvPrenom.setText(patient.getInformation().getsPrenomPatient());
+                tvNom.setText(patient.getInformation().getsNomPatient());
+                tvAdresse.setText(patient.getInformation().getsAdresse());
+                tvGrouppeSanguin.setText(patient.getInformation().getsGrouppeSanguin());
 
 
 
-            }else if(getArguments().getInt(ARG_SECTION_NUMBER)==2)
-            {
-                rootView = inflater.inflate(R.layout.frag_traitement, container, false);
-                mListView = (ListView) rootView.findViewById(R.id.listViewTraitement);
-                List<Patient.Traitement> traitements = hmatysiak.getListTraitement();
-                ItemTraitementAdapter adapter = new ItemTraitementAdapter(getContext(),traitements);
-                if (mListView != null || adapter != null){
+            } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 2) {
+                rootView = inflater.inflate(R.layout.frag_relation, container, false);
+                mListView = (ListView) rootView.findViewById(R.id.listViewRelation);
+                List<Patient.Relation> relations = patient.getListRelation();
+                ItemRelationAdapter adapter = new ItemRelationAdapter(getContext(), relations);
+
+                if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
                 }
 
-
-            }else if(getArguments().getInt(ARG_SECTION_NUMBER)==3)
-            {
+            } else if (getArguments().getInt(ARG_SECTION_NUMBER) == 3) {
                 rootView = inflater.inflate(R.layout.frag_alergie_maladie, container, false);
                 mListView = (ListView) rootView.findViewById(R.id.listViewAlergieMaladie);
-                List<Patient.AlergieMaladie> alergieMaladies = hmatysiak.getListAlergieMaladie();
-                ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(),alergieMaladies);
-                if (mListView != null || adapter != null){
+                List<Patient.AlergieMaladie> alergieMaladies = patient.getListAlergieMaladie();
+                ItemAlergieMaladieAdapter adapter = new ItemAlergieMaladieAdapter(getContext(), alergieMaladies);
+
+                if (mListView != null || adapter != null) {
                     mListView.setAdapter(adapter);
                 }
 
-            }else{
+
+
+            } else {
                 rootView = inflater.inflate(R.layout.fragment_medical_file, container, false);
 
             }
 
-            android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(rootView.getContext());
+            NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(rootView.getContext());
 
             if (mNfcAdapter == null) {
                 AlertDialog alertDialog = new AlertDialog.Builder(getContext()).create();
@@ -391,7 +434,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 case 0:
                     return "Information";
                 case 1:
-                    return "Traitement";
+                    return "Relation";
                 case 2:
                     return "Alergie et maladie";
             }
@@ -400,7 +443,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
     }
 
-    class MyTimer extends TimerTask{
+    class MyTimer extends TimerTask {
 
         public void run() {
             runOnUiThread(new Runnable() {
@@ -409,18 +452,23 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                     //code exécuté par l'UI thread
 
                     //coed pour le nfc
-                    android.nfc.NfcAdapter mNfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(context);
+                    NfcAdapter mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+                    if (!mNfcAdapter.isEnabled()) {
+                        imageViewNFC.setImageResource(R.drawable.nfcrouge);
+                    } else {
 
-                    if (!mNfcAdapter.isEnabled()) imageViewNFC.setImageResource(R.drawable.nfcrouge);
-                    else imageViewNFC.setImageResource(R.drawable.nfcvert);
+                        if (!mNfcAdapter.isEnabled())
+                            imageViewNFC.setImageResource(R.drawable.nfcrouge);
+                        else imageViewNFC.setImageResource(R.drawable.nfcvert);
 
 
-                    //code pour le connexion internet
-                    checkInternetStatus();
+                        //code pour le connexion internet
+                        checkInternetStatus();
 
-                    if (!isConnected) imageViewConnexion.setImageResource(R.drawable.connexionrouge);
-                    else imageViewConnexion.setImageResource(R.drawable.connexionvert);
-
+                        if (!isConnected)
+                            imageViewConnexion.setImageResource(R.drawable.connexionrouge);
+                        else imageViewConnexion.setImageResource(R.drawable.connexionvert);
+                    }
                 }
             });
 

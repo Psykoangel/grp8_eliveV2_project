@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_email"
                     android:textColorHint="@color/red"
-                    android:textColor="@color/black"
+                    android:textColor="@color/red"
                     android:inputType="textEmailAddress"
                     android:maxLines="1"
                     android:singleLine="true" />
@@ -65,7 +65,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/prompt_password"
                     android:textColorHint="@color/red"
-                    android:textColor="@color/black"
+                    android:textColor="@color/red"
                     android:imeActionId="@+id/login"
                     android:imeActionLabel="@string/action_sign_in_short"
                     android:imeOptions="actionUnspecified"
