@@ -43,6 +43,7 @@ import java.util.TimerTask;
 import fr.group8.elive.exceptions.NfcException;
 import fr.group8.elive.models.Patient;
 import fr.group8.elive.models.User;
+import fr.group8.elive.tasks.AutoLocalStorageTask;
 import fr.group8.elive.utils.AlertHelper;
 import fr.group8.elive.utils.JsonHelper;
 import fr.group8.elive.utils.NfcWrapper;
@@ -60,7 +61,9 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
     // Defines the single acces to the Storage Manager object
     // Handles the SQLite and private files management
-    private StorageManager stManager;
+    // StorageManager follows the Singleton pattern,
+    // it does not need to be instancied in a member variable of this activity.
+
     // Defines the Internet Access Connection Status as a boolean value
     private boolean isConnected;
 
@@ -95,13 +98,8 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 WebService ws = new WebService();
                 InputStream is = ws.getUserInfos(userId);
 
-                // ** TODO Run this on another Thread
-                try {
-                    stManager.storeJsonData(is);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                // ** TODO !!!
+                AutoLocalStorageTask task = new AutoLocalStorageTask();
+                task.execute(is);
 
                 User u = JsonHelper.Instance().translateJsonToObject(User.class, is);
                 p = new Patient(u);
@@ -113,7 +111,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
             if (p != null) {
                 // Display function to display Patient Info
-                // TODO Here /!\
+                
                 // Display(p);
             } else {
                 AlertHelper.showAlert(this, "ERROR", "No user found locally either remotely.");
@@ -124,7 +122,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     private Patient searchLocalData(String userId) {
 
         try {
-            User u = stManager.searchUser(userId);
+            User u = StorageManager.Instance().searchUser(userId);
             Patient p = new Patient(u);
             return p;
         } catch (Exception e) {
@@ -212,14 +210,13 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
             e.printStackTrace();
         }
 
-        stManager = new StorageManager();
-        stManager.loadContext(this);
+        StorageManager.Instance().loadContext(this);
         try {
-            stManager.createDataBase(this);
+            StorageManager.Instance().createDataBase(this);
         } catch (StormException e) {
             e.printStackTrace();
         }
-        stManager.initiateDBManager(this, StorageManager.APP_DB_NAME);
+        StorageManager.Instance().initiateDBManager(this, StorageManager.APP_DB_NAME);
 
     }
 
@@ -250,16 +247,6 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         drawer.closeDrawer(GravityCompat.START);
 
         return true;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
     }
 
     /**
