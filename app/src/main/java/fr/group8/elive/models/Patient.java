@@ -51,7 +51,8 @@ public class Patient {
             }
         }
 
-        if (user.getPersonalData().getCmas() != null
+        if (user != null
+                && user.getPersonalData().getCmas() != null
                 && !user.getPersonalData().getCmas().getEntries().isEmpty()) {
             this.setListAlergieMaladie(new ArrayList<AlergieMaladie>());
             for (CMAEntry e : user.getPersonalData().getCmas().getEntries()) {

@@ -21,7 +21,7 @@ public class WebService {
         return ourInstance;
     }
 
-    private final String DOMAIN = "10.167.50.53";
+    private final String DOMAIN = "10.167.128.148";
     private final String PORT = "8080";
     private final String PROTOCOLE = "http";
     private final String TLD = "fr";
@@ -33,27 +33,20 @@ public class WebService {
         defineServerUrl(PROTOCOLE, DOMAIN, null, PORT, APP_HIERARCHIY);
     }
 
-    private static int count = 0;
+    // private static int count = 0;
 
     private InputStream sendRequest(URL url) {
-/*
+
         // Connection Opening
         HttpURLConnection urlConnection = null;
 
-        try {
-            urlConnection = (HttpURLConnection) url.openConnection();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
         // URL Connection
         try {
-            urlConnection.connect();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        try {
+            urlConnection = (HttpURLConnection) url.openConnection();
+
+            urlConnection.connect();
+
             // If Server Response is OK
             if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 return urlConnection.getInputStream();
@@ -61,8 +54,9 @@ public class WebService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-*/
 
+        return null;
+/*
         String CMatysiak = "{\"userId\":3,\"personaldataId\":2,\"userUniqId\":\"CHMATYSIAKGODNB\",\"userIsdeleted\":false,\"userCreationdate\":\"2016-02-01T00:00:00+01:00\",\"relationships\":[{\"userUniqSrcId\":\"CHMATYSIAKGODNB\",\"userUniqTargetId\":\"HMATYSIAKGODNB\",\"relationTypeId\":5}],\"personalData\":{\"bloodgroupId\":0,\"personaldataUserfirstname\":\"Charles\",\"personaldataUsername\":\"MATYSIAK\",\"personaldataBirthdate\":\"1950-03-07T00:00:00+01:00\",\"personaldataAddress\":\"27 Porte de Buhl\",\"cmas\":{\"entry\":[]}}}";
 
         String CaMatysiak = "{\"userId\":4,\"personaldataId\":3,\"userUniqId\":\"CMMATYSIAKGODNB\",\"userIsdeleted\":false,\"userCreationdate\":\"2016-02-01T00:00:00+01:00\",\"relationships\":[{\"userUniqSrcId\":\"CMMATYSIAKGODNB\",\"userUniqTargetId\":\"HMATYSIAKGODNB\",\"relationTypeId\":5}],\"personalData\":{\"bloodgroupId\":0,\"personaldataUserfirstname\":\"Carmen\",\"personaldataUsername\":\"MATYSIAK\",\"personaldataBirthdate\":\"1960-09-09T00:00:00+01:00\",\"personaldataAddress\":\"27 Porte de Buhl\",\"cmas\":{\"entry\":[]}}}";
@@ -87,6 +81,7 @@ public class WebService {
 
         InputStream is = new ByteArrayInputStream(select.getBytes());
         return is;
+*/
     }
 
     public InputStream getUserInfos(String patientId) {

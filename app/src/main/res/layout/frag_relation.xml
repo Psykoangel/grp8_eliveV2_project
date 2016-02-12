@@ -7,8 +7,7 @@
         android:id="@+id/listViewRelation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:dividerHeight="2dp">
-    </ListView>
+        android:dividerHeight="2dp"/>
 
     <TextView
         android:id="@+id/empty_relations"

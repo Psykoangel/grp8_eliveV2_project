@@ -264,9 +264,11 @@ public class StorageManager {
 
             if (usersList != null && usersList.size() > 0) {
                 usersList = changeExistingUser(usersList, user);
+            } else {
+                usersList.add(user);
             }
 
-            if (usersList != null) {
+            if (usersList != null && usersList.size() > 0) {
                 writeJsonDataFile(
                         JsonHelper.toJson(usersList, usersList.getClass()),
                         file);
@@ -381,10 +383,24 @@ public class StorageManager {
         int count = 0;
 
         try {
+            reader.beginArray();
+
             while (reader.hasNext()) {
-                if (reader.nextString().contentEquals(SEARCH_DELTA))
-                    count++;
+
+                reader.beginObject();
+
+                while (reader.hasNext()) {
+                    String name =  reader.nextName();
+                    if (name.equals(SEARCH_DELTA)) {
+                        count++;
+                    } else
+                        reader.skipValue();
+                }
+
+                reader.endObject();
             }
+
+            reader.endArray();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -434,13 +450,7 @@ public class StorageManager {
     }
 
     private User searchSpecificUserInFile(File file, DataUser user) {
-        try {
-            JsonReader reader = new JsonReader(new FileReader(file));
-            return JsonHelper.translateStreamToSearchedObject(User.class, reader, user.getUniqId());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return JsonHelper.searchObjectInFile(User.class, file, user.getUniqId());
     }
 
     public void createDataBase(Context context) throws StormException {

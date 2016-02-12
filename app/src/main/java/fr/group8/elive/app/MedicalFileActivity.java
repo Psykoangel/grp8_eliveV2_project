@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.nfc.NfcAdapter;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -35,9 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 import fr.group8.elive.exceptions.NfcException;
-import fr.group8.elive.models.CMAItem;
 import fr.group8.elive.models.Patient;
 import fr.group8.elive.models.Relationship;
 import fr.group8.elive.models.User;
@@ -73,6 +74,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     private ImageView imageViewNFC;
     private ImageView imageViewConnexion;
     private DrawerLayout drawer;
+    private User user;
 
     public static Patient patient;
 
@@ -115,7 +117,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
         Timer timer = new Timer();
         MyTimer mytimer = new MyTimer();
-        timer.schedule(mytimer, 0, 1000 * 60);// 1000 = 1sec; *60 = 1min.
+        timer.schedule(mytimer, 0, 1000 * 15);// 1000 = 1sec; *15 = 15sec.
 
         checkMedias();
 
@@ -141,6 +143,8 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
+        patient = null;
+
         Toast.makeText(this, getString(R.string.nfc_tag_detected), Toast.LENGTH_LONG).show();
         //Toast.makeText(this, "NB : " + StorageManager.Instance().getDbManager().count(CMAItem.class), Toast.LENGTH_LONG).show();
 
@@ -158,26 +162,15 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
         {
             Patient p = null;
             if (isConnected) {
-                WebService ws = new WebService();
-                InputStream is = ws.getUserInfos(userId);
+                WebServiceTask wsTask = new WebServiceTask();
+                wsTask.execute(userId);
 
-                User user = JsonHelper.translateJsonToObject(User.class, is);
-
-                AutoLocalStorageTask task = new AutoLocalStorageTask();
-                task.execute(user);
-
-                List<User> relations = null;
-                if (!user.getRelationships().isEmpty()) {
-                    relations = new ArrayList<>();
-                    for (Relationship r : user.getRelationships()) {
-                        relations.add(JsonHelper.translateJsonToObject(User.class, ws.getUserInfos(r.getUserUniqTargetId())));
-                    }
-                }
-
-                if (relations != null) {
-                    p = new Patient(user, relations);
-                } else {
-                    p = new Patient(user);
+                try {
+                    p = wsTask.get();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
                 }
             } else {
                 p = searchLocalData(userId);
@@ -199,15 +192,18 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
         try {
             User user = searchLocalUser(userId);
+
             List<User> relations = null;
             if (!user.getRelationships().isEmpty()) {
                 relations = new ArrayList<>();
                 for (Relationship r : user.getRelationships()) {
-                    relations.add(searchLocalUser(r.getUserUniqTargetId()));
+                    User localUserRelation = searchLocalUser(r.getUserUniqTargetId());
+                    if (localUserRelation != null)
+                        relations.add(localUserRelation);
                 }
             }
 
-            if (relations != null) {
+            if (user != null && relations != null && relations.size() > 0) {
                 return new Patient(user, relations);
             } else {
                 return new Patient(user);
@@ -264,7 +260,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     @Override
     protected void onPause() {
         super.onPause();
-        if (NfcWrapper.Instance().IsContextReady())
+        //if (NfcWrapper.Instance().IsContextReady())
             NfcWrapper.Instance().desactivateForegroundIntentCatching(this);
     }
 
@@ -272,16 +268,16 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
     protected void onResume() {
         super.onResume();
         checkMedias();
-        if (NfcWrapper.Instance().IsContextReady()) {
+        //if (NfcWrapper.Instance().IsContextReady()) {
             NfcWrapper.Instance().activateForegroundIntentCatching(this);
-        } else {
-            try {
-                NfcWrapper.Instance().setNfcAdapter(this);
-                NfcWrapper.Instance().activateForegroundIntentCatching(this);
-            } catch (NfcException e) {
-                e.printStackTrace();
-            }
-        }
+        //} else {
+        //    try {
+        //        NfcWrapper.Instance().setNfcAdapter(this);
+        //        NfcWrapper.Instance().activateForegroundIntentCatching(this);
+        //    } catch (NfcException e) {
+        //        e.printStackTrace();
+        //    }
+        //}
 
     }
 
@@ -359,7 +355,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
 
                 TextView tvNomLabel = (TextView) rootView.findViewById(R.id.nomlabel);
                 TextView tvPrenomLabel = (TextView) rootView.findViewById(R.id.prenomlabel);
-                TextView tvAdresseLabel = (TextView) rootView.findViewById(R.id.adresse);
+                TextView tvAdresseLabel = (TextView) rootView.findViewById(R.id.adresselabel);
                 TextView tvGrouppeSanguinLabel = (TextView) rootView.findViewById(R.id.groupe_sanguinlabel);
                 TextView tvIdLabel = (TextView) rootView.findViewById(R.id.idlabel);
                 TextView tvTelLabel = (TextView) rootView.findViewById(R.id.tellabel);
@@ -397,7 +393,7 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 mListView.setEmptyView(emptyText);
 
                 if (patient != null && !patient.getListRelation().isEmpty()) {
-                    ItemRelationAdapter adapter = new ItemRelationAdapter(getContext(), patient.getListRelation());
+                    ItemRelationAdapter adapter = new ItemRelationAdapter(rootView.getContext(), patient.getListRelation());
 
                     mListView.setAdapter(adapter);
                 }
@@ -451,6 +447,8 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
             super(fm);
         }
 
+
+
         @Override
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
@@ -495,6 +493,55 @@ public class MedicalFileActivity extends AppCompatActivity implements Navigation
                 }
             });
 
+        }
+    }
+
+    /**
+     * Created by psyko on 12/02/16.
+     */
+    public class WebServiceTask extends AsyncTask<String, Void, Patient> {
+
+        @Override
+        protected Patient doInBackground(String... params) {
+
+            if (params == null || params.length == 0) return null;
+
+            WebService service = new WebService();
+
+            InputStream userStream = service.getUserInfos(params[0]);
+
+            if (userStream == null) return null;
+
+            user = JsonHelper.translateJsonToObject(User.class, userStream);
+
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    AutoLocalStorageTask task = new AutoLocalStorageTask();
+                    task.execute(user);
+                }
+            });
+
+            List<User> relations = null;
+            if (!user.getRelationships().isEmpty()) {
+                relations = new ArrayList<>();
+                for (Relationship r : user.getRelationships()) {
+                    relations.add(JsonHelper.translateJsonToObject(User.class, service.getUserInfos(r.getUserUniqTargetId())));
+                }
+            }
+
+            Patient p;
+
+            if (relations != null) {
+                p = new Patient(user, relations);
+            } else {
+                p = new Patient(user);
+            }
+
+            if (p != null)
+                return p;
+
+            return null;
         }
     }
 }
