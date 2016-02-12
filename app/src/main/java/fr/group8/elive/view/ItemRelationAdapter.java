@@ -16,16 +16,20 @@ import fr.group8.elive.models.Patient;
  * Created by chriis on 03/02/2016.
  */
 public class ItemRelationAdapter extends ArrayAdapter<Patient.Relation> {
-    public ItemRelationAdapter(Context context, List<Patient.Relation> items){super(context,0,items);
+
+    public ItemRelationAdapter(Context context, List<Patient.Relation> items) {
+        super(context, 0, items);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
-        if(convertView ==null){
+    public View getView(int position, View convertView, ViewGroup parent) {
+        if(convertView == null){
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_relation,parent,false);
         }
+
         ItemViewHolder viewHolder = (ItemViewHolder) convertView.getTag();
-        if(viewHolder ==null){
+
+        if(viewHolder == null){
             viewHolder = new ItemViewHolder();
             viewHolder.textNom = (TextView) convertView.findViewById(R.id.TextViewRelationNom);
             viewHolder.textPrenom = (TextView) convertView.findViewById(R.id.TextViewRelationPrenom);
@@ -39,8 +43,6 @@ public class ItemRelationAdapter extends ArrayAdapter<Patient.Relation> {
         viewHolder.textType.setText(Relation.getsType());
 
         return convertView;
-
-
     }
 
     private class ItemViewHolder{

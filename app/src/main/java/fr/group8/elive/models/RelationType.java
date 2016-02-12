@@ -43,4 +43,8 @@ public class RelationType {
                 ", name='" + name + '\'' +
                 '}';
     }
+
+    public boolean isValid() {
+        return !getName().isEmpty();
+    }
 }

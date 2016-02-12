@@ -21,7 +21,6 @@ public class DataUser {
 
     @Column
     @DBNonNull
-    @Index("uniqId")
     private String uniqId;
 
     @Column
@@ -31,6 +30,8 @@ public class DataUser {
     @Column
     @DBNonNull
     private Date lastUpdate;
+
+    public DataUser() {}
 
     public DataUser(String uniqId) {
         this.setUniqId(uniqId);

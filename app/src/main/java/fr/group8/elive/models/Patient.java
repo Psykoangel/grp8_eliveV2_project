@@ -1,5 +1,8 @@
 package fr.group8.elive.models;
 
+import android.os.Parcelable;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,89 +13,87 @@ import fr.group8.elive.utils.StorageManager;
  */
 public class Patient {
     private String uniqId;
-    private Information information;
-    private List<Relation> listRelation;
-    private List<AlergieMaladie> listAlergieMaladie;
+    private Information information = null;
+    private List<Relation> listRelation = null;
+    private List<AlergieMaladie> listAlergieMaladie = null;
 
-
-    public Patient(){
-    }
+    public Patient() {}
 
     public Patient(User user) {
+        this(user, null);
+    }
+
+    public Patient(User user, List<User> relations) {
         this.setId(user.getUserUniqId());
-        /*Information info = new Information(
+
+        Information info = new Information(
                 user.getPersonalData().getPersonaldataUsername(),
                 user.getPersonalData().getPersonaldataUserfirstname(),
                 user.getPersonalData().getPersonaldataAddress(),
                 StorageManager.Instance().selectBloodGroup(user.getPersonalData().getBloodgroupId()),
-                null,
-                null,
-                null,
-                null
-        );*/
+                user.getUserUniqId(),
+                user.getPersonalData().getPersonaldataPhonenumber()
+        );
+
+        this.setInformation(info);
+
+        if (relations != null
+                && !relations.isEmpty()) {
+            this.setListRelation(new ArrayList<Relation>());
+            for (int i = 0; i < user.getRelationships().size(); i++) {
+                this.getListRelation().add(
+                    new Relation(
+                        relations.get(i).getPersonalData().getPersonaldataUsername(),
+                        relations.get(i).getPersonalData().getPersonaldataUserfirstname(),
+                        StorageManager.Instance().selectRelationType(user.getRelationships().get(i).getRelationTypeId())
+                    )
+                );
+            }
+        }
+
+        if (user.getPersonalData().getCmas() != null
+                && !user.getPersonalData().getCmas().getEntries().isEmpty()) {
+            this.setListAlergieMaladie(new ArrayList<AlergieMaladie>());
+            for (CMAEntry e : user.getPersonalData().getCmas().getEntries()) {
+                this.getListAlergieMaladie().add(
+                    new AlergieMaladie(
+                        StorageManager.Instance().selectCMA(e.getKey()),
+                        e.getValue()
+                    )
+                );
+            }
+        }
     }
 
-    public Patient(Information information, List<Relation> listRelation, List<AlergieMaladie> listAlergieMaladie){
-        this.uniqId = null;
-        this.listRelation = listRelation;
-        this.information = information;
-        this.listAlergieMaladie = listAlergieMaladie;
-    }
+    public String getId(){ return uniqId; }
+    public Information getInformation() { return information; }
+    public List<AlergieMaladie> getListAlergieMaladie() { return listAlergieMaladie; }
+    public List<Relation> getListRelation() { return listRelation; }
 
-    public String getId(){
-        return uniqId;
-    }
-
-    public void setId(String id){
-        this.uniqId = id;
-    }
-
-    public Information getInformation() {
-        return information;
-    }
-
-    public List<AlergieMaladie> getListAlergieMaladie() {
-        return listAlergieMaladie;
-    }
-
-    public List<Relation> getListRelation() {
-        return listRelation;
-    }
-
-    public void setInformation(Information information) {
-        this.information = information;
-    }
-
-    public void setListAlergieMaladie(List<AlergieMaladie> listAlergieMaladie) {
-        this.listAlergieMaladie = listAlergieMaladie;
-    }
-
-    public void setListTraitement(List<Relation> listRelation) {
-        this.listRelation = listRelation;
-    }
-
+    public void setId(String id){ this.uniqId = id; }
+    public void setInformation(Information information) { this.information = information; }
+    public void setListAlergieMaladie(List<AlergieMaladie> listAlergieMaladie) { this.listAlergieMaladie = listAlergieMaladie; }
+    public void setListRelation(List<Relation> listRelation) { this.listRelation = listRelation; }
 
     //**********************************************
     //**************Object Information**************
     //**********************************************
-
-
     public static class Information{
         private String sNomPatient;
         private String sPrenomPatient;
         private String sAdresse;
-        private String sGrouppeSanguin;
+        private String sGroupeSanguin;
         private String sId;
         private String sTel;
 
 
 
 
-        public Information(String sNomPatient, String sPrenomPatient, String sAdresse, String sGrouppeSanguin,String sId,String sTel){
+        public Information(String sNomPatient, String sPrenomPatient, String sAdresse, String sGroupeSanguin,String sId,String sTel){
             this.sNomPatient = sNomPatient;
             this.sAdresse = sAdresse;
             this.sPrenomPatient = sPrenomPatient;
-            this.sGrouppeSanguin = sGrouppeSanguin;
+            this.sGroupeSanguin = sGroupeSanguin;
             this.sId = sId;
             this.sTel = sTel;
 
@@ -102,8 +103,8 @@ public class Patient {
             return sAdresse;
         }
 
-        public String getsGrouppeSanguin() {
-            return sGrouppeSanguin;
+        public String getsGroupeSanguin() {
+            return sGroupeSanguin;
         }
 
         public String getsNomPatient() {
@@ -126,8 +127,8 @@ public class Patient {
             this.sAdresse = sAdresse;
         }
 
-        public void setsGrouppeSanguin(String sGrouppeSanguin) {
-            this.sGrouppeSanguin = sGrouppeSanguin;
+        public void setsGroupeSanguin(String sGroupeSanguin) {
+            this.sGroupeSanguin = sGroupeSanguin;
         }
 
         public void setsNomPatient(String sNomPatient) {
@@ -147,13 +148,9 @@ public class Patient {
         }
     }
 
-
     //*********************************************
     //**************Object Relation**************
     //*********************************************
-
-
-
     public static class Relation{
         private String sNomRelation;
         private String sPrenomRelation;
@@ -165,37 +162,14 @@ public class Patient {
             this.sType = sType;
         }
 
-        public String getsNomRelation() {
-            return sNomRelation;
-        }
-
-        public String getsPrenomRelation() {
-            return sPrenomRelation;
-        }
-
-        public String getsType() {
-            return sType;
-        }
-
-        public void setsNomRelation(String sNomRelation) {
-            this.sNomRelation = sNomRelation;
-        }
-
-        public void setsPrenomRelation(String sPrenomRelation) {
-            this.sPrenomRelation = sPrenomRelation;
-        }
-
-        public void setsType(String sType) {
-            this.sType = sType;
-        }
+        public String getsNomRelation() { return sNomRelation; }
+        public String getsPrenomRelation() { return sPrenomRelation; }
+        public String getsType() { return sType; }
     }
 
     //************************************************
     //**************Object AlergieMaladie*************
     //************************************************
-
-
-
     public static class AlergieMaladie{
         private String sAlergieMaladie;
         private Date dDate;
@@ -205,21 +179,9 @@ public class Patient {
             this.sAlergieMaladie = sAlergieMaladie;
         }
 
-        public Date getdDate() {
-            return dDate;
-        }
+        public Date getdDate() { return dDate; }
 
-        public String getsAlergieMaladie() {
-            return sAlergieMaladie;
-        }
-
-        public void setdDate(Date dDate) {
-            this.dDate = dDate;
-        }
-
-        public void setsAlergieMaladie(String sAlergieMaladie) {
-            this.sAlergieMaladie = sAlergieMaladie;
-        }
+        public String getsAlergieMaladie() { return sAlergieMaladie; }
     }
 
 

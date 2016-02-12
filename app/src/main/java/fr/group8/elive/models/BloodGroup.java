@@ -58,7 +58,7 @@ public class BloodGroup {
                 '}';
     }
 
-    public boolean isValide() {
+    public boolean isValid() {
         return !getName().isEmpty() && !getSign().isEmpty();
     }
 }

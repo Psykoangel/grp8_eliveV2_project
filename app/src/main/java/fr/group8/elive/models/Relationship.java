@@ -4,29 +4,23 @@ package fr.group8.elive.models;
  * Created by psyko on 09/02/16.
  */
 public class Relationship {
-    private String userSrcUniqId;
-    private String userTargetUniqId;
+    private String userUniqSrcId;
+    private String userUniqTargetId;
     private int relationTypeId;
 
-    public String getUserSrcUniqId() {
-        return userSrcUniqId;
+    public String getUserUniqSrcId() {
+        return userUniqSrcId;
     }
 
-    public void setUserSrcUniqId(String userSrcUniqId) {
-        this.userSrcUniqId = userSrcUniqId;
+    public String getUserUniqTargetId() {
+        return userUniqTargetId;
     }
 
-    public String getUserTargetUniqId() {
-        return userTargetUniqId;
-    }
+    public int getRelationTypeId() { return relationTypeId; }
 
-    public void setUserTargetUniqId(String userTargetUniqId) {
-        this.userTargetUniqId = userTargetUniqId;
-    }
+    public void setUserUniqSrcId(String userUniqSrcId) { this.userUniqSrcId = userUniqSrcId; }
 
-    public int getRelationTypeId() {
-        return relationTypeId;
-    }
+    public void setUserUniqTargetId(String userUniqTargetId) { this.userUniqTargetId = userUniqTargetId; }
 
     public void setRelationTypeId(int relationTypeId) {
         this.relationTypeId = relationTypeId;
@@ -34,10 +28,10 @@ public class Relationship {
 
     @Override
     public String toString() {
-        return "relationship [userSrcUniqId="
-                + userSrcUniqId
-                + ", userTargetUniqId="
-                + userTargetUniqId
+        return "relationship [userUniqSrcId="
+                + userUniqSrcId
+                + ", userUniqTargetId="
+                + userUniqTargetId
                 + ", relationTypeId="
                 + relationTypeId + "]";
     }

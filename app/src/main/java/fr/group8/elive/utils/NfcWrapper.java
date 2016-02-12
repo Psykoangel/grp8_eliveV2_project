@@ -30,14 +30,17 @@ public class NfcWrapper {
 
     private NfcAdapter mNfcAdapter;
     private Context mContext;
+    private boolean isContextReady;
 
     public NfcWrapper() {
         mContext = null;
+        setIsContextReady(false);
     }
 
     public void setNfcAdapter(Context context) throws NfcException {
         if (mContext == null && context != null) {
             mContext = context;
+            setIsContextReady(true);
         } else throw new NfcException("Context == null", NfcExceptionType.NFC_UNKNOWN_ERROR);
 
         mNfcAdapter = NfcAdapter.getDefaultAdapter(mContext);
@@ -138,5 +141,13 @@ public class NfcWrapper {
         }
 
         return text.isEmpty() ? null : text;
+    }
+
+    public boolean IsContextReady() {
+        return isContextReady;
+    }
+
+    public void setIsContextReady(boolean isContextReady) {
+        this.isContextReady = isContextReady;
     }
 }

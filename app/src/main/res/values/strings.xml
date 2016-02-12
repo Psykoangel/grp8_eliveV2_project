@@ -31,9 +31,11 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="title_activity_medical_file">MedicalFileActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
-    <string name="Tel">Téléphone : </string>
-    <string name="Id">ID : </string>
+    <string name="tel">Téléphone : </string>
+    <string name="id">ID : </string>
     <string name="groupe_sanguin">Groupe sanguin : </string>
     <string name="db_sqlinsert_bloodgroup">INSERT INTO `bloodgroup` (`bloodgroup_name`, `bloodgroup_sign`) VALUES\n(\'O\', \'+\'),\n(\'O\', \'-\'),\n(\'A\', \'+\'),\n(\'A\', \'-\'),\n(\'AB\', \'+\'),\n(\'AB\', \'-\'),\n(\'B\', \'+\'),\n(\'B\', \'-\');</string>
     <string name="db_sqlinsert_relationtype">INSERT INTO `relationtype` (`relationtype_name`) VALUES\n(\'Père\'),\n(\'Mère\'),\n(\'Epoux\'),\n(\'Epouse\'),\n(\'Fils\'),\n(\'Fille\');</string>
+    <string name="no_available_information">Aucune information disponible</string>
+    <string name="nfc_config_item">Paramétre NFC</string>
 </resources>

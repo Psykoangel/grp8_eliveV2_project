@@ -19,16 +19,20 @@ import fr.group8.elive.models.Patient;
  * Created by chriis on 03/02/2016.
  */
 public class ItemAlergieMaladieAdapter extends ArrayAdapter<Patient.AlergieMaladie> {
-    public ItemAlergieMaladieAdapter(Context context, List<Patient.AlergieMaladie> items){super(context,0,items);
+
+    public ItemAlergieMaladieAdapter(Context context, List<Patient.AlergieMaladie> items) {
+        super(context,0,items);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
-        if(convertView ==null){
+        if(convertView ==null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_alergie_maladie,parent,false);
         }
+
         ItemViewHolder viewHolder = (ItemViewHolder) convertView.getTag();
-        if(viewHolder ==null){
+
+        if(viewHolder ==null) {
             viewHolder = new ItemViewHolder();
             viewHolder.text = (TextView) convertView.findViewById(R.id.TextViewAlergieMaladie);
             viewHolder.date = (TextView) convertView.findViewById(R.id.TextViewDateAlergieMaladie);
@@ -43,8 +47,6 @@ public class ItemAlergieMaladieAdapter extends ArrayAdapter<Patient.AlergieMalad
         viewHolder.date.setText(reportDate);
 
         return convertView;
-
-
     }
 
     private class ItemViewHolder{
